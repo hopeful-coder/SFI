@@ -21,8 +21,9 @@ names(pop)[1] <- 'id'
 names(arrests)[1] <- 'id'
 
 #Load in NCC Data
-ncc1 <- read.csv('NCC1_june.csv', skip = 12, header = T)
-ncc2 <- read.csv('NCC2_june.csv', skip = 12, header = T)
+ncc1 <- read.csv('NCC1_sep19.csv', skip = 12, header = T)
+ncc2 <- read.csv('NCC2_sep19.csv', skip = 12, header = T)
+
 #Clean up NCC Data for merging purposes
 ncc1 <- ncc1[,-1]
 ncc2 <- ncc2[,-1]
@@ -32,6 +33,9 @@ names(ncc2)[1] <- 'id'
 names(ncc1)[5] <- 'ncc_date'
 names(ncc2)[5] <- 'ncc_date'
 ncc <- rbind(ncc1[,c(1,5)], ncc2[,c(1,5)])
+ncc[ncc$id == '749462/169056', 'id'] = '749462'
+ncc[ncc$id == '4852861/4589517', 'id'] = '4852861'
+
 
 #Merge population dataset and arrest dataset and ncc dataset
 test <- merge(pop, arrests, by = 'id', all.x = T)
@@ -325,7 +329,19 @@ pas <- abbie.final2[abbie.final2$X.6 == 'Probation as Usual', ]
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 
-write.csv(pfs, 'Payforsuccess_flatfile_september19_191018.csv', row.names = F)
+write.csv(pfs, 'Payforsuccess_flatfile_september19_191019.csv', row.names = F)
+
+#Create dataframe for final numbers needed.
+final <- data.frame(clean = c(),
+                    potential = c())
+for(i in 1:7){
+  word.used.p = paste0('pq', i)
+  word.used.c = paste0('cq', i)
+  
+  df = data.frame(clean = table(pfs[[word.used.p]])[2],
+                  potential = table(pfs[[word.used.c]])[2])
+  final = rbind(final, df)
+}
 
 ###############################################################################
 ###############################################################################
