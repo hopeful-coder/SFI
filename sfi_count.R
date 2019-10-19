@@ -63,22 +63,17 @@ for(i in 1:length(unique.ids)){
   #Extract one person's data to analyze at a time.
   words <- test2[test2$id == unique.ids[i], ]
   
-  #Make a vector of dates in order with the arrest dates included from their intake date
-  #arrest dates
-  row <- c(words$Arrest.Date)
-  if(is.na(row)){
-    row <- min(words$X.5 + 90)
-  }
   #Clean quarter dates
   words$X.5 <- as.Date(words$X.5, format = '%Y-%m-%d')
   cq.dates <- words$X.5 + 90*c(0:11)
+  #Use NCC dates
   if(!is.na(unique(words$ncc_date))){
     ncc_date = unique(c(words$ncc_date))
     min.ncc.quarter = max(which(ncc_date >= cq.dates))
     cq.dates <- cq.dates[1:min.ncc.quarter]
   }
   
-  #Begin creating the data file
+  #Begin creating the data file for the unique individual
   abbie <- data.frame(id = unique(words$id),
                       randomization.date = unique(words$X.5),
                       day90  = cq.dates[2],
@@ -97,7 +92,8 @@ for(i in 1:length(unique.ids)){
                       day631 = cq.dates[8] + 1
   )
   
-  
+  #Fix two specific dates
+  #I wish there was a better way.
   x = as.Date('2019-01-01', format = '%Y-%m-%d')
   if(cq.dates[1] == x){
     cq.dates[1] = x + 1
@@ -107,25 +103,21 @@ for(i in 1:length(unique.ids)){
     cq.dates[2] = x + 1
   }
   
+  #Begin potential quarter calculation
   quarters_achieved = c()
   cq.dates.df = data.frame()
   for(i in 1:length(cq.dates)){
     cq.dates.df.1 = data.frame(cq.dates = cq.dates[i],
                                quarter  = max(which(cq.dates[i] > dates)))
     cq.dates.df = rbind(cq.dates.df, cq.dates.df.1)
-
     cq.dates2 = cq.dates
     cq.dates = cq.dates[-1]
-    
-    
     min.q = max(which(cq.dates[i] > dates))
-   
     if(is.na(cq.dates[i+1])){
       cq.dates[i + 1] = cq.dates[i]
     }
     min.q = ifelse(cq.dates[i+1] - cq.dates[i] == 90, min.q, min.q)
     max.q = min(which(cq.dates[i] < dates))
-
     quarters_achieved = c(quarters_achieved, min.q)
     cq.dates = cq.dates2
   }
@@ -269,10 +261,10 @@ for(i in 1:length(unique.ids)){
     }
   }
   
-  
+  #Ever arrested indicator variable
   abbie$ever.arrested <- ifelse(any(is.na(arrests.abbie)), 0, 1)
   
-  
+  #Which quarter were you arrested in calculation
   arrests = c(words$Arrest.Date)
   arrest.quarter.list = c()
   cq.dates = cq.dates2
@@ -287,6 +279,7 @@ for(i in 1:length(unique.ids)){
     }
   }
 
+  #Not sure if this will fix the issue where 2 potential quarters, but both were arrested in.
   duplicated_quarters = quarters_achieved[which(duplicated(quarters_achieved) & quarters_achieved %in% arrest.quarter.list)]
   quarters_achieved = quarters_achieved[!(quarters_achieved %in% arrest.quarter.list)]
   quarters_achieved = c(quarters_achieved, duplicated_quarters)
@@ -334,7 +327,8 @@ pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 
 write.csv(pfs, 'Payforsuccess_flatfile_september19_191018.csv', row.names = F)
 
-
+###############################################################################
+###############################################################################
 ###############################################################################
 #Start of testing to be done
 ###############################################################################
