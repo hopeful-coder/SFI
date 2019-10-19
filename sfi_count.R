@@ -116,56 +116,28 @@ for(i in 1:length(unique.ids)){
     cq.dates[2] = x + 1
   }
   
-  
-  
-  
-  # min.q = if(cq.dates[i] > dates[1] & )
-  
   quarters_achieved = c()
   cq.dates.df = data.frame()
   for(i in 1:length(cq.dates)){
     cq.dates.df.1 = data.frame(cq.dates = cq.dates[i],
                                quarter  = max(which(cq.dates[i] > dates)))
     cq.dates.df = rbind(cq.dates.df, cq.dates.df.1)
-    # if(i == length(cq.dates)){
-    #   min.q = max(which(cq.dates[i] >= dates))
-    #   quarters_achieved = c(quarters_achieved, min.q)
-    # }else{
-    
-    # add.dates = which(cq.dates[i] == dates)
-    # cq.dates[add.dates] = cq.dates[add.dates] + 1
+
     cq.dates2 = cq.dates
     cq.dates = cq.dates[-1]
     
     
     min.q = max(which(cq.dates[i] > dates))
-    # if(any(cq.dates[i] == dates)){
-    #   min.q = max(which(cq.dates[i] >= dates))
-    # }
-    # min.q = ifelse(any(cq.dates[i] == dates), 
-    #                max(which(cq.dates[i] >= dates)),
-    #                max(which(cq.dates[i] >  dates)))
-    # min.q = ifelse(any(cq.dates[i] == dates), max(which(cq.dates[i] - 89 > dates)), min.q)
+   
     if(is.na(cq.dates[i+1])){
       cq.dates[i + 1] = cq.dates[i]
     }
-    # min.q = ifelse(cq.dates[i+1] - dates[min.q] >= 90, min.q, 0)
     min.q = ifelse(cq.dates[i+1] - cq.dates[i] == 90, min.q, min.q)
     max.q = min(which(cq.dates[i] < dates))
-    # if(i == 1){
-    #   min.q = ifelse(any(cq.dates[1] == dates), max(which(cq.dates[i] >= dates)), min.q)
-    # }
+
     quarters_achieved = c(quarters_achieved, min.q)
     cq.dates = cq.dates2
   }
-  
-  # 
-  # if(is.na(ncc_date)){
-  #   quarters_achieved = quarters_achieved
-  # } else{
-  #   ncc_quarter = max(which(ncc_date >= dates))
-  #   quarters_achieved = quarters_achieved[quarters_achieved < ncc_quarter]
-  # }
   
   if(length(cq.dates) == 1){
     quarters_achieved = 0
@@ -183,8 +155,6 @@ for(i in 1:length(unique.ids)){
   
   testing <- c(cq.dates, row)
   sorted.all <- sort(testing)
-  
-  
   
   #Strict arrest days array for making abbie
   arrests.abbie <- c(words$Arrest.Date)
@@ -329,11 +299,7 @@ for(i in 1:length(unique.ids)){
       arrest.quarter.list = c(arrest.quarter.list, arrest.quarter.min)
     }
   }
-  
-  # for(i in 1:length(arrest.quarter.list)){
-  #   q.remove = which(quarters_achieved[i] %in% arrest.quarter.list)[1]
-  #   quarters_achieved = quarters_achieved[-q.remove]
-  # }
+
   duplicated_quarters = quarters_achieved[which(duplicated(quarters_achieved) & quarters_achieved %in% arrest.quarter.list)]
   quarters_achieved = quarters_achieved[!(quarters_achieved %in% arrest.quarter.list)]
   quarters_achieved = c(quarters_achieved, duplicated_quarters)
