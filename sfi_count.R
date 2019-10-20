@@ -300,8 +300,6 @@ for(i in 1:length(unique.ids)){
   abbie$pq6 <- ifelse(6 %in% quarters_achieved, sum(quarters_achieved == 6), 0)
   abbie$pq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   
-  abbie$det = unique(words$X.6)
-  
   abbie$jan_march18 <- ifelse(abbie$cq1 != 0 & abbie$pq1 != 0, abbie$pq1,
                               ifelse(abbie$cq1 != 0 & abbie$pq1 == 0, 0, NA))
   abbie$apr_june18  <- ifelse(abbie$cq2 != 0 & abbie$pq2 != 0, abbie$pq2,
