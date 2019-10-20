@@ -110,6 +110,10 @@ for(i in 1:length(unique.ids)){
   if(any(cq.dates == x)){
     cq.dates[2] = x + 1
   }
+  x = as.Date('2019-07-01', format = '%Y-%m-%d')
+  if(any(cq.dates == x)){
+    cq.dates[2] = x + 1
+  }
   
   #Begin potential quarter calculation
   quarters_achieved = c()
@@ -327,8 +331,8 @@ names(abbie.final2)[indice] = 'RandomGroup'
 # write.csv(abbie.final, 'ucla_arrest_data_190127.csv', row.names = F)
 
 
-pfs <- abbie.final2[abbie.final2$X.6 == 'Pay for Success',]               
-pas <- abbie.final2[abbie.final2$X.6 == 'Probation as Usual', ]               
+pfs <- abbie.final2[abbie.final2$RandomGroup == 'Pay for Success',]               
+pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]               
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 
@@ -364,6 +368,17 @@ prop.test(c(num.arrested.pfs, num.arrested.pas), n = c(nrow(pfs), nrow(pas)))
 ###############################################################################
 old = read.csv('Payforsuccess_flatfile_september19_191018.csv')
 abbie.final = abbie.final[abbie.final$id %in% pfs$id, ]
+
+pfs2 = read.csv('PayforSuccess_flatfile_june_190819.csv')
+
+test = pfs2[pfs2$pq4 != 0,]
+test2 = pfs[pfs$pq4 != 0,]
+
+test = test$id
+test2 = test2$id
+
+test2 %in% test
+
 
 abbie.final$cq1 == pfs$cq1
 abbie.final$cq2 == pfs$cq2
