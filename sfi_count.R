@@ -93,7 +93,11 @@ for(i in 1:length(unique.ids)){
                       day540 = cq.dates[7],
                       day541 = cq.dates[7] + 1,
                       day630 = cq.dates[8],
-                      day631 = cq.dates[8] + 1
+                      day631 = cq.dates[8] + 1,
+                      day720 = cq.dates[9],
+                      day721 = cq.dates[9] + 1,
+                      day800 = cq.dates[10],
+                      day801 = cq.dates[10] + 1
   )
   
   #Fix two specific dates
