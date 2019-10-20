@@ -322,7 +322,8 @@ for(i in 1:length(unique.ids)){
 }
 
 abbie.final2 <- merge(abbie.final, pop[, c('id', 'X.6', 'Intake.Date')], by = 'id')
-
+indice = which(names(abbie.final2) == 'X.6')
+names(abbie.final2)[indice] = 'RandomGroup'
 # write.csv(abbie.final, 'ucla_arrest_data_190127.csv', row.names = F)
 
 
