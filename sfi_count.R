@@ -329,7 +329,7 @@ pas <- abbie.final2[abbie.final2$X.6 == 'Probation as Usual', ]
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 
-write.csv(pfs, 'Payforsuccess_flatfile_september19_191019.csv', row.names = F)
+# write.csv(pfs, 'Payforsuccess_flatfile_september19_191019.csv', row.names = F)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
@@ -338,8 +338,8 @@ for(i in 1:7){
   word.used.p = paste0('pq', i)
   word.used.c = paste0('cq', i)
   
-  df = data.frame(clean = table(pfs[[word.used.p]])[2],
-                  potential = table(pfs[[word.used.c]])[2])
+  df = data.frame(clean = sum(pfs[[word.used.p]]),
+                  potential =sum(pfs[[word.used.c]]))
   final = rbind(final, df)
 }
 
@@ -359,6 +359,7 @@ prop.test(c(num.arrested.pfs, num.arrested.pas), n = c(nrow(pfs), nrow(pas)))
 #Diagnositics procedures
 #Probably old and can be updated.
 ###############################################################################
+old = read.csv('Payforsuccess_flatfile_september19_191018.csv')
 abbie.final = abbie.final[abbie.final$id %in% pfs$id, ]
 
 abbie.final$cq1 == pfs$cq1
