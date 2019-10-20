@@ -329,7 +329,7 @@ pas <- abbie.final2[abbie.final2$X.6 == 'Probation as Usual', ]
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 
-# write.csv(pfs, 'Payforsuccess_flatfile_september19_191019.csv', row.names = F)
+write.csv(pfs, 'Payforsuccess_flatfile_september19_191020.csv', row.names = F)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
