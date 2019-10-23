@@ -69,7 +69,7 @@ for(i in 1:length(unique.ids)){
   
   #Clean quarter dates
   words$X.5 <- as.Date(words$X.5, format = '%Y-%m-%d')
-  cq.dates <- words$X.5 + 90*c(0:11)
+  cq.dates <- words$X.5 + 90*c(0:6)
   #Use NCC dates
   if(!is.na(unique(words$ncc_date))){
     ncc_date = unique(c(words$ncc_date))
@@ -89,15 +89,7 @@ for(i in 1:length(unique.ids)){
                       day360 = cq.dates[5],
                       day361 = cq.dates[5] + 1,
                       day450 = cq.dates[6],
-                      day451 = cq.dates[6] + 1,
-                      day540 = cq.dates[7],
-                      day541 = cq.dates[7] + 1,
-                      day630 = cq.dates[8],
-                      day631 = cq.dates[8] + 1,
-                      day720 = cq.dates[9],
-                      day721 = cq.dates[9] + 1,
-                      day800 = cq.dates[10],
-                      day801 = cq.dates[10] + 1
+                      day451 = cq.dates[6] + 1
   )
   
   #Fix two specific dates
@@ -304,6 +296,10 @@ for(i in 1:length(unique.ids)){
   abbie$pq6 <- ifelse(6 %in% quarters_achieved, sum(quarters_achieved == 6), 0)
   abbie$pq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   
+  
+  abbie[abbie$id == 3334613, 'cq5'] = 0
+  abbie[abbie$id == 3334613, 'cq6'] = 1
+  
   abbie$jan_march18 <- ifelse(abbie$cq1 != 0 & abbie$pq1 != 0, abbie$pq1,
                               ifelse(abbie$cq1 != 0 & abbie$pq1 == 0, 0, NA))
   abbie$apr_june18  <- ifelse(abbie$cq2 != 0 & abbie$pq2 != 0, abbie$pq2,
@@ -335,8 +331,9 @@ pfs <- abbie.final2[abbie.final2$RandomGroup == 'Pay for Success',]
 pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]               
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
+pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('09/30/2019', format = '%m/%d/%Y'),])
 
-write.csv(pfs, 'Payforsuccess_flatfile_september19_191020.csv', row.names = F)
+write.csv(pfs, 'Payforsuccess_flatfile_september19_191023.csv', row.names = F)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
