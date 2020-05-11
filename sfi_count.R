@@ -99,8 +99,8 @@ for(i in 1:length(unique.ids)){
   #Fix two specific dates
   #I wish there was a better way.
   x = as.Date('2020-01-01', format = '%Y-%m-%d')
-  if(cq.dates[1] == x){
-    cq.dates[1] = x + 1
+  if(any(cq.dates == x)){
+    cq.dates[2] = x + 1
   }
   x = as.Date('2019-01-01', format = '%Y-%m-%d')
   if(cq.dates[1] == x){
