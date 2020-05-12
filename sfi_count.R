@@ -391,9 +391,26 @@ prop.test(c(num.arrested.pfs, num.arrested.pas), n = c(nrow(pfs), nrow(pas)))
 #Heatmap
 ###############################################################################
 arrest.matrix = na.omit(arrest.matrix)
-arrest.data = data.matrix(arrest.matrix[, 2:9])
-arrest.heatmap <- heatmap(arrest.data, Colv=NA, col = cm.colors(256), scale="column")
 
+arrest.matrix2 <- merge(arrest.matrix, pop[, c('id', 'X.6')], by = 'id')
+
+arrest.matrix2.pfs = arrest.matrix2[arrest.matrix2$X.6 == 'Pay for Success',]
+arrest.matrix2.pau = arrest.matrix2[arrest.matrix2$X.6 == 'Probation as Usual',]
+arrest.data.pfs = data.matrix(arrest.matrix2.pfs[, 2:9])
+arrest.data.pau = data.matrix(arrest.matrix2.pau[, 2:9])
+arrest.heatmap <- heatmap(arrest.data.pfs, Colv=NA, col = cm.colors(256), scale="column")
+arrest.heatmap <- heatmap(arrest.data.pau, Colv=NA, col = cm.colors(256), scale="column")
+
+#Arrests per group
+pfs.month = colSums(arrest.matrix2.pfs[,2:9])
+pau.month = colSums(arrest.matrix2.pau[,2:9])
+data = data.frame(month = 1:8,
+                  pfs = pfs.month,
+                  pau = pau.month)
+library(ggplot2)
+ggplot(data) + geom_line(aes(y = pau, x = month)) + geom_line(aes(y = pfs, x = month))
+
+#Want to include arrests adjusted for sample size per group.
 
 ###############################################################################
 #Diagnositics procedures
