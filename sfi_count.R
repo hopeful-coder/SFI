@@ -59,6 +59,9 @@ test2$Arrest.Date <- as.Date(test2$Arrest.Date, format = '%m/%d/%Y')
 #List of unique ids
 unique.ids <- unique(test2$id)
 
+#List for arrest matrix
+arrest.matrix = data.frame()
+
 #Make a loop which figures out which quarter in the formal dates the clean quarter if any happened in
 abbie <- c()
 abbie <- data.frame(abbie)
@@ -254,7 +257,7 @@ for(i in 1:length(unique.ids)){
       abbie$arrest10 <- arrests.abbie[10]
       abbie$arrest11 <- arrests.abbie[11]
       abbie$arrest12 <- arrests.abbie[12]
-      abbie$arrest12 <- arrests.abbie[13]
+      abbie$arrest13 <- arrests.abbie[13]
     }
     else if(length(arrests.abbie) == 14){
       abbie$arrest1 <- arrests.abbie[1]
@@ -269,13 +272,14 @@ for(i in 1:length(unique.ids)){
       abbie$arrest10 <- arrests.abbie[10]
       abbie$arrest11 <- arrests.abbie[11]
       abbie$arrest12 <- arrests.abbie[12]
-      abbie$arrest12 <- arrests.abbie[13]
-      abbie$arrest12 <- arrests.abbie[14]
+      abbie$arrest13 <- arrests.abbie[13]
+      abbie$arrest14 <- arrests.abbie[14]
     }
   }
   
   #Ever arrested indicator variable
   abbie$ever.arrested <- ifelse(any(is.na(arrests.abbie)), 0, 1)
+  
   
   #Which quarter were you arrested in calculation
   arrests = c(words$Arrest.Date)
@@ -291,7 +295,18 @@ for(i in 1:length(unique.ids)){
       arrest.quarter.list = c(arrest.quarter.list, arrest.quarter.min)
     }
   }
-
+  
+  #Arrest matrix
+  arrest.inter = data.frame(id = unique(words$id))
+  arrest.inter$one = sum(arrest.quarter.list == 1)
+  arrest.inter$two = sum(arrest.quarter.list == 2)
+  arrest.inter$thr = sum(arrest.quarter.list == 3)
+  arrest.inter$fou = sum(arrest.quarter.list == 4)
+  arrest.inter$fiv = sum(arrest.quarter.list == 5)
+  arrest.inter$six = sum(arrest.quarter.list == 6)
+  arrest.inter$sev = sum(arrest.quarter.list == 7)
+  arrest.inter$eig = sum(arrest.quarter.list == 8)
+  arrest.matrix = rbind(arrest.matrix, arrest.inter)
   #Not sure if this will fix the issue where 2 potential quarters, but both were arrested in.
   duplicated_quarters = quarters_achieved[which(duplicated(quarters_achieved) & quarters_achieved %in% arrest.quarter.list)]
   quarters_achieved = quarters_achieved[!(quarters_achieved %in% arrest.quarter.list)]
@@ -372,123 +387,18 @@ prop.test(c(num.arrested.pfs, num.arrested.pas), n = c(nrow(pfs), nrow(pas)))
 
 
 ###############################################################################
+#Heatmap
+#Heatmap
+###############################################################################
+arrest.matrix = na.omit(arrest.matrix)
+arrest.data = data.matrix(arrest.matrix[, 2:9])
+arrest.heatmap <- heatmap(arrest.data, Colv=NA, col = cm.colors(256), scale="column")
+
+
+###############################################################################
 #Diagnositics procedures
 #Probably old and can be updated.
 ###############################################################################
-old = read.csv('Payforsuccess_flatfile_september19_191018.csv')
-abbie.final = abbie.final[abbie.final$id %in% pfs$id, ]
-
-pfs2 = read.csv('PayforSuccess_flatfile_june_190819.csv')
-
-test = pfs2[pfs2$pq4 != 0,]
-test2 = pfs[pfs$pq4 != 0,]
-
-test = test$id
-test2 = test2$id
-
-test2 %in% test
-
-
-abbie.final$cq1 == pfs$cq1
-abbie.final$cq2 == pfs$cq2
-abbie.final$cq3 == pfs$cq3
-abbie.final$cq4 == pfs$cq4
-abbie.final$cq5 == pfs$cq5
-
-abbie.final$pq1 == pfs$pq1
-abbie.final$pq2 == pfs$pq2
-abbie.final$pq3 == pfs$pq3
-abbie.final$pq4 == pfs$pq4
-abbie.final$pq5 == pfs$pq5
-
-pfs2 <- read.csv('payforsuccess_flatfile_june_190819.csv')
-
-pfs.arrests <- pfs[!is.na(pfs$arrest1),]
-pas.arrests <- pas[!is.na(pas$arrest1),]
-
-pfs.arrest.diff <- pfs.arrests$arrest1 - pfs.arrests$randomization.date
-pas.arrest.diff <- pas.arrests$arrest1 - pas.arrests$randomization.date
-
-mean(pfs.arrest.diff)
-sd(pfs.arrest.diff)
-mean(pas.arrest.diff)
-sd(pas.arrest.diff)
-
-old <- read.csv('PayforSuccess_flatfile_dec_190115.csv')
-
-old$jan_march18 == pfs$jan_march18
-old$apr_june18 == pfs$apr_june18
-old$july_sep18 == pfs$july_sep18
-old$oct_dec18 == pfs$oct_dec18
-
-rashmi3 <- read.csv('rashmi.csv')
-rashmi <- read.csv('rashmi_june19.csv')
-
-names(rashmi)[1] <- 'id'
-names(rashmi)[2] <- 'cq1'
-names(rashmi)[3] <- 'cq2'
-names(rashmi)[4] <- 'cq3'
-names(rashmi)[5] <- 'cq4'
-names(rashmi)[6] <- 'cq5'
-names(rashmi)[7] <- 'cq6'
-
-names(rashmi)[8] <- 'pq1'
-names(rashmi)[9] <- 'pq3'
-names(rashmi)[10] <- 'pq4'
-names(rashmi)[11] <- 'pq5'
-names(rashmi)[12] <- 'pq6'
-names(rashmi)[13] <- 'pq7'
-names(rashmi)[14] <- 'pq8'
-
-rashmi$cq1 <- as.numeric(as.character(rashmi$cq1))
-rashmi$cq2 <- as.numeric(as.character(rashmi$cq2))
-rashmi$cq3 <- as.numeric(as.character(rashmi$cq3))
-rashmi$cq4 <- as.numeric(as.character(rashmi$cq4))
-rashmi$cq5 <- as.numeric(as.character(rashmi$cq5))
-rashmi$cq6 <- as.numeric(as.character(rashmi$cq6))
-
-rashmi$pq1 <- as.numeric(as.character(rashmi$pq1))
-rashmi$pq3 <- as.numeric(as.character(rashmi$pq3))
-rashmi$pq4 <- as.numeric(as.character(rashmi$pq4))
-rashmi$pq5 <- as.numeric(as.character(rashmi$pq5))
-rashmi$pq6 <- as.numeric(as.character(rashmi$pq6))
-rashmi$pq7 <- as.numeric(as.character(rashmi$pq7))
-
-
-which(rashmi$cq1 != pfs$jan_march18)
-which(rashmi$cq2 != pfs$apr_june18)
-which(rashmi$cq3 != pfs$july_sep18)
-which(rashmi$cq4 != pfs$oct_dec18)
-which(rashmi$cq5 != pfs$jan_march19)
-which(rashmi$cq6 != pfs$apr_june19)
-
-test <- pfs[pfs$apr_june18 == 1,]
-test <- test[!is.na(test$apr_june18),]
-test2 <- rashmi[rashmi$pq3 == 1,]
-test2 <- test2[!is.na(test2$pq3),]
-
-which(test2$id %in% test$id)
-
-noob <- pfs[pfs$id %in% c(152977, 4235457, 4320120,
-                          532098),]
-r3 = rashmi$cq3[c(9, 27, 98, 99)]
-r4 = rashmi$cq4[c(9, 27, 98, 99)]
-
-p3 <- noob$cq3
-p4 <- noob$cq4
-
-#july_sep18
-ind = which(unique.ids == 4320120)
-i = ind
-
-
-# pfs_old = pfs
-# pfs_comp = pfs[pfs$id %in% pfs_old$id,]
-
-pfs_comp$id == pfs_old$id
-pfs_comp$pq2 == pfs_old$pq2
-
-
 which(abbie$day90 - dates <= 0)[1] - 1
 
 
