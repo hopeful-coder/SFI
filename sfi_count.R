@@ -103,9 +103,12 @@ for(i in 1:length(unique.ids)){
                       day361 = cq.dates[5] + 1,
                       day450 = cq.dates[6],
                       day451 = cq.dates[6] + 1,
-                      day540 = cq.dates[6] + 90,
-                      day541 = cq.dates[6] + 91,
-                      day630 = cq.dates[6] + 180
+                      day540 = cq.dates[7],
+                      day541 = cq.dates[7] + 1,
+                      day630 = cq.dates[8]
+                      # day540 = cq.dates[6] + 90,
+                      # day541 = cq.dates[6] + 91,
+                      # day630 = cq.dates[6] + 180
   )
   
   #Fix two specific dates
@@ -125,6 +128,11 @@ for(i in 1:length(unique.ids)){
   x = as.Date('2019-07-01', format = '%Y-%m-%d')
   if(any(cq.dates == x)){
     cq.dates[2] = x + 1
+  }
+  x = as.Date('2020-04-01', format = '%Y-%m-%d')
+  if(any(cq.dates == x)){
+    placement = which(cq.dates == x)
+    cq.dates[placement] = x + 1
   }
   
   #Begin potential quarter calculation
