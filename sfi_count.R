@@ -1,7 +1,7 @@
 library(dplyr)
 library(plyr)
 
-setwd('C:/Users/Mitchell Schepps/Desktop/nena')
+setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
 pop <- read.csv('UCLAQuarterlyReportMarch2020Population.csv', skip = 1)
 arrests <- read.csv('UCLAQuarterlyReportMarch2020Arrests.csv')
@@ -40,7 +40,7 @@ ncc2 <- read.csv('ncc2_Jan20.csv', skip = 12, header = T)
 # ncc[ncc$id == '4852861/4589517', 'id'] = '4852861'
 # dup = which(duplicated(ncc$id))
 # ncc = ncc[-dup, ]
-
+setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 #New ncc
 ncc = read.csv('ncc_420.csv', skip = 9)
 names(ncc)[1] = 'id'
@@ -93,6 +93,7 @@ for(i in 1:length(unique.ids)){
   #Begin creating the data file for the unique individual
   abbie <- data.frame(id = unique(words$id),
                       randomization.date = unique(words$X.5),
+                      risk.level = unique(words$Risk.Level),
                       day90  = cq.dates[2],
                       day91  = cq.dates[2] + 1,
                       day180 = cq.dates[3],
@@ -170,28 +171,46 @@ for(i in 1:length(unique.ids)){
   abbie$cq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
   
   #Strict arrest days array for making abbie
+  abbie$num.arrests = 0
   arrests.abbie <- c(words$Arrest.Date)
+  arrests.type <- words$Offense.Level
   if(!is.na(arrests.abbie)){
+    abbie$num.arrests = length(arrests.abbie)
     if(length(arrests.abbie) == 1){
       abbie$arrest1 <- arrests.abbie
+      abbie$arrest1type <- arrests.type
     } else if(length(arrests.abbie) == 2){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
     } else if(length(arrests.abbie) == 3){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
       abbie$arrest3 <- arrests.abbie[3]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
     } else if(length(arrests.abbie) == 4){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
       abbie$arrest3 <- arrests.abbie[3]
       abbie$arrest4 <- arrests.abbie[4]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
     } else if(length(arrests.abbie) == 5){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
       abbie$arrest3 <- arrests.abbie[3]
       abbie$arrest4 <- arrests.abbie[4]
       abbie$arrest5 <- arrests.abbie[5]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest4type <- arrests.type[5]
     } else if(length(arrests.abbie) == 6){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -199,6 +218,12 @@ for(i in 1:length(unique.ids)){
       abbie$arrest4 <- arrests.abbie[4]
       abbie$arrest5 <- arrests.abbie[5]
       abbie$arrest6 <- arrests.abbie[6]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
     } else if(length(arrests.abbie) == 7){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -207,6 +232,13 @@ for(i in 1:length(unique.ids)){
       abbie$arrest5 <- arrests.abbie[5]
       abbie$arrest6 <- arrests.abbie[6]
       abbie$arrest7 <- arrests.abbie[7]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
     } else if(length(arrests.abbie) == 8){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -216,6 +248,14 @@ for(i in 1:length(unique.ids)){
       abbie$arrest6 <- arrests.abbie[6]
       abbie$arrest7 <- arrests.abbie[7]
       abbie$arrest8 <- arrests.abbie[8]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
     } else if(length(arrests.abbie) == 9){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -226,6 +266,15 @@ for(i in 1:length(unique.ids)){
       abbie$arrest7 <- arrests.abbie[7]
       abbie$arrest8 <- arrests.abbie[8]
       abbie$arrest9 <- arrests.abbie[9]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
     } else if(length(arrests.abbie) == 10){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -237,6 +286,16 @@ for(i in 1:length(unique.ids)){
       abbie$arrest8 <- arrests.abbie[8]
       abbie$arrest9 <- arrests.abbie[9]
       abbie$arrest10 <- arrests.abbie[10]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
+      abbie$arrest10type <- arrests.type[10]
     } else if(length(arrests.abbie) == 11){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -249,6 +308,17 @@ for(i in 1:length(unique.ids)){
       abbie$arrest9 <- arrests.abbie[9]
       abbie$arrest10 <- arrests.abbie[10]
       abbie$arrest11 <- arrests.abbie[11]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
+      abbie$arrest10type <- arrests.type[10]
+      abbie$arrest11type <- arrests.type[11]
     } else if(length(arrests.abbie) == 12){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -262,6 +332,18 @@ for(i in 1:length(unique.ids)){
       abbie$arrest10 <- arrests.abbie[10]
       abbie$arrest11 <- arrests.abbie[11]
       abbie$arrest12 <- arrests.abbie[12]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
+      abbie$arrest10type <- arrests.type[10]
+      abbie$arrest11type <- arrests.type[11]
+      abbie$arrest12type <- arrests.type[12]
     }else if(length(arrests.abbie) == 13){
       abbie$arrest1 <- arrests.abbie[1]
       abbie$arrest2 <- arrests.abbie[2]
@@ -276,6 +358,19 @@ for(i in 1:length(unique.ids)){
       abbie$arrest11 <- arrests.abbie[11]
       abbie$arrest12 <- arrests.abbie[12]
       abbie$arrest13 <- arrests.abbie[13]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
+      abbie$arrest10type <- arrests.type[10]
+      abbie$arrest11type <- arrests.type[11]
+      abbie$arrest12type <- arrests.type[12]
+      abbie$arrest13type <- arrests.type[13]
     }
     else if(length(arrests.abbie) == 14){
       abbie$arrest1 <- arrests.abbie[1]
@@ -292,6 +387,20 @@ for(i in 1:length(unique.ids)){
       abbie$arrest12 <- arrests.abbie[12]
       abbie$arrest13 <- arrests.abbie[13]
       abbie$arrest14 <- arrests.abbie[14]
+      abbie$arrest1type <- arrests.type[1]
+      abbie$arrest2type <- arrests.type[2]
+      abbie$arrest3type <- arrests.type[3]
+      abbie$arrest4type <- arrests.type[4]
+      abbie$arrest5type <- arrests.type[5]
+      abbie$arrest6type <- arrests.type[6]
+      abbie$arrest7type <- arrests.type[7]
+      abbie$arrest8type <- arrests.type[8]
+      abbie$arrest9type <- arrests.type[9]
+      abbie$arrest10type <- arrests.type[10]
+      abbie$arrest11type <- arrests.type[11]
+      abbie$arrest12type <- arrests.type[12]
+      abbie$arrest13type <- arrests.type[13]
+      abbie$arrest14type <- arrests.type[14]
     }
   }
   
@@ -385,7 +494,7 @@ pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020
 
 pfs$arrest9 = NULL
 
-write.csv(pfs, 'Payforsuccess_flatfile_Mar20.csv', row.names = F)
+# write.csv(pfs, 'Payforsuccess_flatfile_Mar20.csv', row.names = F)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
