@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(plyr)
 library(ggplot2)
+library(kableExtra)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
@@ -110,6 +111,8 @@ for(i in 1:length(unique.ids)){
                       randomization.date = unique(words$X.5),
                       risk.level = unique(words$Risk.Level),
                       race = unique(words$X.4),
+                      age = unique(words$X.2),
+                      gender = unique(words$X.3),
                       day90  = cq.dates[2],
                       day91  = cq.dates[2] + 1,
                       day180 = cq.dates[3],
@@ -508,8 +511,8 @@ pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
 
-pfs_pop = colSums(pfs[,c(18:26)])
-pfs_clean = colSums(pfs[,c(29:37)])
+pfs_pop = colSums(pfs[,c(20:28)])
+pfs_clean = colSums(pfs[,c(31:39)])
 pfs_a = pfs_pop - pfs_clean
 pfs_a <- data.frame(index = c(1:9),
                     arrests = pfs_a)
@@ -519,25 +522,64 @@ pfs_pop = data.frame(index = c(1:9),
 other <- pas              
 # other <- other[!(other$Intake.Date == ' '), ]
 # other <- (other[as.Date(other$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
-other_pop = colSums(other[,c(18:26)])
-other_clean = colSums(other[,c(29:37)])
+other_pop = colSums(other[,c(20:28)])
+other_clean = colSums(other[,c(31:39)])
 other_a = other_pop - other_clean
 other_a <- data.frame(index = c(1:9),
                     arrests = other_a)
 other_pop = data.frame(index = c(1:9),
                      pop = other_pop)
 
+npfs = dim(pfs)[1]
+nother = dim(other)[1]
+pfs_age = paste0(round(mean(pfs$age), 1), ' (', round(sd(pfs$age), 1), ')')
+other_age = paste0(round(mean(other$age), 1), ' (', round(sd(other$age), 1), ')')
+pfs_black = table(pfs$race)[1]
+pfs_race = data.frame(table(pfs$race))
+pfs_gender = data.frame(table(pfs$gender))
+pfs_risk.level = data.frame(table(pfs$risk.level))
 
+other_race = data.frame(table(other$race))
+other_gender = data.frame(table(other$gender))
+other_risk.level = data.frame(table(other$risk.level))
+
+pfs_race[,1] = as.character(pfs_race[,1])
+pfs_race[2,1] = 'Other'
+pfs_race[2,2] = '5'
+pfs_race = pfs_race[1:4,]
+
+other_race[,1] = as.character(other_race[,1])
+other_race[2,1] = 'Other'
+other_race[2,2] = '8'
+other_race = other_race[1:4,]
+
+M <- as.table(rbind(as.numeric(pfs_race[,2]), as.numeric(other_race[,2])))
+race_p = chisq.test(M)$p.value
+
+gender_p = prop.test(c(pfs_gender[2,2], other_gender[2,2]), c(sum(pfs_gender[,2]), sum(other_gender[,2])))$p.value
+
+age_p = t.test(pfs$age, other$age)$p.value
+
+M <- as.table(rbind(as.numeric(pfs_risk.level[,2]), as.numeric(other_risk.level[,2])))
+risk_p = chisq.test(M)$p.value
+
+demo_df = data.frame(variable = c('n', 'Age, Mean (SD)', 'Female/Male', 'Race', 'White', 'Hispanic', 'Black', 'Other', 'ORAS Risk Level', 'Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'),
+                     pfs = c(npfs, pfs_age, paste(pfs_gender[1,2], pfs_gender[2,2], sep = '/'), '', pfs_race[3,2], pfs_race[4,2], pfs_race[1,2], pfs_race[2,2], '', pfs_risk.level[3,2], pfs_risk.level[4,2], pfs_risk.level[5,2],
+                             pfs_risk.level[2,2], pfs_risk.level[6,2]),
+                     other = c(nother, other_age, paste(other_gender[1,2], other_gender[2,2], sep = '/'), '', other_race[3,2], other_race[4,2], other_race[1,2], other_race[2,2], '', other_risk.level[3,2], other_risk.level[4,2], other_risk.level[5,2],
+                             other_risk.level[2,2], other_risk.level[6,2]),
+                     pval = c('-', round(age_p, 4), round(gender_p, 4), round(race_p, 4), '-', '-', '-', '-', round(risk_p, 4),  '-', '-', '-', '-', '-'))
+kable(demo_df)
 ```
 
+
+## Criminal Justice History
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
 
 # ggplot() + geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
-## Criminal Justice History
-
 ## Broken down by risk factors
 
 ## Differences within service members between those arrested and not
