@@ -511,24 +511,11 @@ pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
 
-pfs_pop = colSums(pfs[,c(20:28)])
-pfs_clean = colSums(pfs[,c(31:39)])
-pfs_a = pfs_pop - pfs_clean
-pfs_a <- data.frame(index = c(1:9),
-                    arrests = pfs_a)
-pfs_pop = data.frame(index = c(1:9),
-                  pop = pfs_pop)
+
 
 other <- pas              
 # other <- other[!(other$Intake.Date == ' '), ]
 # other <- (other[as.Date(other$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
-other_pop = colSums(other[,c(20:28)])
-other_clean = colSums(other[,c(31:39)])
-other_a = other_pop - other_clean
-other_a <- data.frame(index = c(1:9),
-                    arrests = other_a)
-other_pop = data.frame(index = c(1:9),
-                     pop = other_pop)
 
 npfs = dim(pfs)[1]
 nother = dim(other)[1]
@@ -575,16 +562,73 @@ kable(demo_df)
 
 ## Criminal Justice History
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
-
+pfs_pop = colSums(pfs[,c(20:28)])
+pfs_clean = colSums(pfs[,c(31:39)])
+pfs_a = pfs_pop - pfs_clean
+pfs_a <- data.frame(index = c(1:9),
+                    arrests = pfs_a)
+pfs_pop = data.frame(index = c(1:9),
+                  pop = pfs_pop)
 # ggplot() + geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
+other_pop = colSums(other[,c(20:28)])
+other_clean = colSums(other[,c(31:39)])
+other_a = other_pop - other_clean
+other_a <- data.frame(index = c(1:9),
+                    arrests = other_a)
+other_pop = data.frame(index = c(1:9),
+                     pop = other_pop)
+
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
 ## Broken down by risk factors
 
-## Differences within service members between those arrested and not
+```{r}
 
+rowSums(table(pfs$risk.level, pfs$num.arrests)[,-1])
+rowSums(table(other$risk.level, other$num.arrests)[,-1])
+risk_df = data.frame(risk.level = c('Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'), 
+                     pfs = c(7,5,51,33,3),
+                     other = c(8,7,54,45,8))
+M <- as.table(rbind(risk_df[,2], risk_df[,3]))
+
+risk_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-', '-')
+kable(risk_df)
+```
+
+## Broken down by race
+
+```{r}
+
+rowSums(table(pfs$race, pfs$num.arrests)[,-1])
+rowSums(table(other$race, other$num.arrests)[,-1])
+race_df = data.frame(race = c('Hispanic', 'White', 'Black', 'Other'), 
+                     pfs = c(55,38,4,2),
+                     other = c(77,31,10,4))
+M <- as.table(rbind(race_df[,2], race_df[,3]))
+
+race_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-')
+kable(race_df)
+```
+
+
+## Broken down by gender
+
+```{r}
+
+rowSums(table(pfs$gender, pfs$num.arrests)[,-1])
+rowSums(table(other$gender, other$num.arrests)[,-1])
+gender_df = data.frame(gender = c('Female', 'Male'), 
+                     pfs = c(17, 82),
+                     other = c(23,99))
+M <- as.table(rbind(gender_df[,2], gender_df[,3]))
+
+gender_df$pval = c(round(chisq.test(M)$p.value, 4), '-')
+kable(gender_df)
+```
 ## Services Received
+
+## Differences within service members between those arrested and not
 
 ## Summary
 
