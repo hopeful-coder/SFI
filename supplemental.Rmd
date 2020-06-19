@@ -1,5 +1,21 @@
+---
+title: "supplemental"
+author: "Mitchell Schepps"
+date: "6/19/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Demographics
+
+```{r, echo=FALSE, warning = F, cache = T, message=F}
 library(dplyr)
 library(plyr)
+library(ggplot2)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
@@ -22,10 +38,6 @@ dates <- dates[-1]
 #Rename columns to match
 names(pop)[1] <- 'id'
 names(arrests)[1] <- 'id'
-
-#Load in NCC Data
-ncc1 <- read.csv('ncc1_Jan20.csv', skip = 12, header = T)
-ncc2 <- read.csv('ncc2_Jan20.csv', skip = 12, header = T)
 
 #Clean up NCC Data for merging purposes
 # ncc1 <- ncc1[,-1]
@@ -496,72 +508,60 @@ pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
 
-pfs$arrest9 = NULL
+pfs_pop = colSums(pfs[,c(18:26)])
+pfs_clean = colSums(pfs[,c(29:37)])
+pfs_a = pfs_pop - pfs_clean
+pfs_a <- data.frame(index = c(1:9),
+                    arrests = pfs_a)
+pfs_pop = data.frame(index = c(1:9),
+                  pop = pfs_pop)
 
-# write.csv(pfs, 'Payforsuccess_flatfile_Mar20.csv', row.names = F)
-
-#Create dataframe for final numbers needed.
-final <- data.frame(clean = c(),
-                    potential = c())
-for(i in 1:9){
-  word.used.p = paste0('pq', i)
-  word.used.c = paste0('cq', i)
-  
-  df = data.frame(clean = sum(pfs[[word.used.p]]),
-                  potential =sum(pfs[[word.used.c]]))
-  final = rbind(final, df)
-}
-
-###############################################################################
-###############################################################################
-###############################################################################
-#Start of testing to be done
-###############################################################################
-#Formal z-test
-num.arrested.pfs <- sum(pfs$ever.arrested)
-num.arrested.pas <- sum(pas$ever.arrested)
-
-prop.test(c(num.arrested.pfs, num.arrested.pas), n = c(nrow(pfs), nrow(pas)))
+other <- pas              
+# other <- other[!(other$Intake.Date == ' '), ]
+# other <- (other[as.Date(other$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
+other_pop = colSums(other[,c(18:26)])
+other_clean = colSums(other[,c(29:37)])
+other_a = other_pop - other_clean
+other_a <- data.frame(index = c(1:9),
+                    arrests = other_a)
+other_pop = data.frame(index = c(1:9),
+                     pop = other_pop)
 
 
-###############################################################################
-#Heatmap
-#Heatmap
-###############################################################################
-arrest.matrix = na.omit(arrest.matrix)
+```
 
-arrest.matrix2 <- merge(arrest.matrix, pop[, c('id', 'X.6')], by = 'id')
+```{r, echo=FALSE, warning = F, cache = T, message=F}
 
-arrest.matrix2.pfs = arrest.matrix2[arrest.matrix2$X.6 == 'Pay for Success',]
-arrest.matrix2.pau = arrest.matrix2[arrest.matrix2$X.6 == 'Probation as Usual',]
-arrest.data.pfs = data.matrix(arrest.matrix2.pfs[, 2:9])
-arrest.data.pau = data.matrix(arrest.matrix2.pau[, 2:9])
+# ggplot() + geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 
-par(mfrow = c(2, 1))
-arrest.heatmap <- heatmap(arrest.data.pfs, Colv=NA, col = cm.colors(256), scale="column")
-arrest.heatmap <- heatmap(arrest.data.pau, Colv=NA, col = cm.colors(256), scale="column")
+ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
+```
+## Criminal Justice History
 
-#Arrests per group
-pfs.month = colSums(arrest.matrix2.pfs[,2:9])
-pau.month = colSums(arrest.matrix2.pau[,2:9])
-data = data.frame(month = 1:8,
-                  pfs = pfs.month,
-                  pau = pau.month)
-library(ggplot2)
-ggplot(data) + geom_line(aes(y = pau, x = month)) + geom_line(aes(y = pfs, x = month))
+## Broken down by risk factors
 
-#Want to include arrests adjusted for sample size per group.
+## Differences within service members between those arrested and not
 
-###############################################################################
-#Diagnositics procedures
-#Probably old and can be updated.
-###############################################################################
-which(abbie$day90 - dates <= 0)[1] - 1
+## Services Received
 
+## Summary
 
+## Cohort 2 Preview
 
-test = pfs[!(pfs$id %in% pfs2$id),]
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-a = abbie.final2[abbie.final2$pq8 == 1, 'id']
-b = final2[abbie.final2$pq8 == 1, 'id']
-which((b %in% a))
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
