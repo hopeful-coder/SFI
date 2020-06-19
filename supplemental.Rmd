@@ -9,14 +9,11 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-## Demographics
-
-```{r, echo=FALSE, warning = F, cache = T, message=F}
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 library(dplyr)
 library(plyr)
 library(ggplot2)
-library(kableExtra)
+# library(#kableExtra)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
@@ -514,9 +511,14 @@ pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020
 
 
 other <- pas              
-# other <- other[!(other$Intake.Date == ' '), ]
-# other <- (other[as.Date(other$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
+```
 
+## Data Collection
+We analyze individuals for 6 observational periods of 90 days. We call these 90 day subsets quarters, and label them quarter 1, quarter 2, and so forth. Cohort 1 collection ends at 6/1/2019, and our observation for them continues through 10/1/19. The cohort 1 enrollment took in `r dim(abbie.final2)[1]` parolees, randomizing `r table(abbie.final2$RandomGroup)[1]` into the Pay for Success program. When we say "between groups", which we will refer to often, we mean between individuals in the Pay for Success program and those in the Control group. Due to NCC processes, `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` people were removed and `r dim(pfs)[1]` were analyzed from start to finish. The other `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` individuals were analyzed for __ of the __ potential quarters before being removed. 
+
+## Demographics
+The demographic variables were supposed to match up between the groups. If they did not, we would have to implement some proportion matching to equate the populations. Table 1 below shows no significant differences between the demographics of Pay for Success Group and the Control group.
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 npfs = dim(pfs)[1]
 nother = dim(other)[1]
 pfs_age = paste0(round(mean(pfs$age), 1), ' (', round(sd(pfs$age), 1), ')')
@@ -556,11 +558,13 @@ demo_df = data.frame(variable = c('n', 'Age, Mean (SD)', 'Female/Male', 'Race', 
                      other = c(nother, other_age, paste(other_gender[1,2], other_gender[2,2], sep = '/'), '', other_race[3,2], other_race[4,2], other_race[1,2], other_race[2,2], '', other_risk.level[3,2], other_risk.level[4,2], other_risk.level[5,2],
                              other_risk.level[2,2], other_risk.level[6,2]),
                      pval = c('-', round(age_p, 4), round(gender_p, 4), round(race_p, 4), '-', '-', '-', '-', round(risk_p, 4),  '-', '-', '-', '-', '-'))
-kable(demo_df)
+#kable(demo_df)
+demo_df
 ```
-
+The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. Predominantly male and predominantly hispanic. The ORAS score follows a moderately normal distribution and again is not significantly different between groups.
 
 ## Criminal Justice History
+Here is both a table and an accompanying graph of the arrests by population enrollment in both cohorts.
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
 pfs_pop = colSums(pfs[,c(20:28)])
 pfs_clean = colSums(pfs[,c(31:39)])
@@ -581,52 +585,61 @@ other_pop = data.frame(index = c(1:9),
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
+
 ## Broken down by risk factors
+We further analyze the arrest rates between groups by looking at the stratification of arrests by ORAS risk score. We see both the unique number of individuals being rearrested and the total number of arrests between groups is not signficiantly different. 
 
-```{r}
+```{r, echo=FALSE, warning = F, cache = T, message=F}
 
-rowSums(table(pfs$risk.level, pfs$num.arrests)[,-1])
-rowSums(table(other$risk.level, other$num.arrests)[,-1])
+# rowSums(table(pfs$risk.level, pfs$num.arrests)[,-1])
+# rowSums(table(other$risk.level, other$num.arrests)[,-1])
 risk_df = data.frame(risk.level = c('Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'), 
                      pfs = c(7,5,51,33,3),
                      other = c(8,7,54,45,8))
 M <- as.table(rbind(risk_df[,2], risk_df[,3]))
 
 risk_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-', '-')
-kable(risk_df)
+#kable(risk_df)
+risk_df
 ```
 
 ## Broken down by race
-
-```{r}
-
-rowSums(table(pfs$race, pfs$num.arrests)[,-1])
-rowSums(table(other$race, other$num.arrests)[,-1])
+Ventura county is predominantly a hispanic community.
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+# 
+# rowSums(table(pfs$race, pfs$num.arrests)[,-1])
+# rowSums(table(other$race, other$num.arrests)[,-1])
 race_df = data.frame(race = c('Hispanic', 'White', 'Black', 'Other'), 
                      pfs = c(55,38,4,2),
                      other = c(77,31,10,4))
 M <- as.table(rbind(race_df[,2], race_df[,3]))
 
 race_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-')
-kable(race_df)
+#kable(race_df)
+race_df
 ```
 
 
 ## Broken down by gender
 
-```{r}
+```{r, echo=FALSE, warning = F, cache = T, message=F}
 
-rowSums(table(pfs$gender, pfs$num.arrests)[,-1])
-rowSums(table(other$gender, other$num.arrests)[,-1])
+# rowSums(table(pfs$gender, pfs$num.arrests)[,-1])
+# rowSums(table(other$gender, other$num.arrests)[,-1])
 gender_df = data.frame(gender = c('Female', 'Male'), 
                      pfs = c(17, 82),
                      other = c(23,99))
 M <- as.table(rbind(gender_df[,2], gender_df[,3]))
 
 gender_df$pval = c(round(chisq.test(M)$p.value, 4), '-')
-kable(gender_df)
+#kable(gender_df)
+gender_df
 ```
 ## Services Received
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+setwd('C:/Users/Mitchell Schepps/Desktop/nena')
+supplemental = read.csv('supplemental_new.csv')
+```
 
 ## Differences within service members between those arrested and not
 
@@ -634,20 +647,3 @@ kable(gender_df)
 
 ## Cohort 2 Preview
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
