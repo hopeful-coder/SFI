@@ -94,6 +94,7 @@ for(i in 1:length(unique.ids)){
   abbie <- data.frame(id = unique(words$id),
                       randomization.date = unique(words$X.5),
                       risk.level = unique(words$Risk.Level),
+                      race = unique(words$X.4),
                       day90  = cq.dates[2],
                       day91  = cq.dates[2] + 1,
                       day180 = cq.dates[3],

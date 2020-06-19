@@ -46,8 +46,8 @@ other_a <- merge(other_a, ncc, by = 'id', all.x = T)
 other_a$ncc_date <- as.Date(other_a$ncc_date, format = '%m/%d/%Y')
 
 
-pfs_pop = colSums(pfs[,c(17:25)])
-pfs_clean = colSums(pfs[,c(28:36)])
+pfs_pop = colSums(pfs[,c(18:26)])
+pfs_clean = colSums(pfs[,c(29:37)])
 pfs_a = pfs_pop - pfs_clean
 pfs_a <- data.frame(index = c(1:9),
                     arrests = pfs_a)
@@ -60,8 +60,8 @@ other <- pas
 # other <- (other[as.Date(other$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
 
 
-other_pop = colSums(other[,c(17:25)])
-other_clean = colSums(other[,c(28:36)])
+other_pop = colSums(other[,c(18:26)])
+other_clean = colSums(other[,c(29:37)])
 other_a = other_pop - other_clean
 other_a <- data.frame(index = c(1:9),
                     arrests = other_a)
