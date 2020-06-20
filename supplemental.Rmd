@@ -613,6 +613,7 @@ other_a <- data.frame(index = c(1:9),
 other_pop = data.frame(index = c(1:9),
                      pop = other_pop)
 
+#Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
                     potential = c())
 for(i in 1:9){
@@ -623,7 +624,7 @@ for(i in 1:9){
                   potential =sum(pfs[[word.used.c]]))
   final = rbind(final, df)
 }
-
+#Create dataframe for final numbers needed.
 final2 <- data.frame(clean = c(),
                     potential = c())
 for(i in 1:9){
@@ -637,11 +638,31 @@ for(i in 1:9){
 
 final$group = 'pfs'
 final2$group = 'other'
+final$num.arrests = colSums(pfs[,c(50:58)], na.rm = T)
+final2$num.arrests = colSums(other[,c(50:58)], na.rm = T)
+
+people <- c()
+people2 <- c()
+for(i in 50:58){
+  test = pfs[,c(i)]
+  test = test[!is.na(test)]
+  test = test[test!=0]
+  people = c(people, length(test))
+}
+
+for(i in 50:58){
+  test = other[,c(i)]
+  test = test[!is.na(test)]
+  test = test[test!=0]
+  people2 = c(people2, length(test))
+}
+final$people = people
+final2$people = people2
+
 final = rbind(final, final2)
-final$people = final$potential - final$clean
 arrest.type = pfs[,c(54:57, 62:65, 67)]
 
-
+final
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
