@@ -30,6 +30,7 @@ dates <- as.Date(c('10-23-2017', '01-01-2018', '04-01-2018', '07-01-2018', '10-0
 #Remove initial date for calculations
 dates <- dates[-1]
 
+
 ###############################################################################
 #Incorporate new information.
 ###############################################################################
@@ -80,11 +81,9 @@ test2 = test2[test2$X.5 < as.Date('06/01/2019', format = '%m/%d/%Y'),]
 
 #List of unique ids
 unique.ids <- unique(test2$id)
-
-#List for arrest matrix
 arrest.matrix = data.frame()
 
-#Make a loop which figures out which quarter in the formal dates the clean quarter if any happened in
+  #Make a loop which figures out which quarter in the formal dates the clean quarter if any happened in
 abbie <- c()
 abbie <- data.frame(abbie)
 abbie.final <- c()
@@ -171,6 +170,8 @@ for(i in 1:length(unique.ids)){
     cq.dates = cq.dates2
   }
   
+  
+  
   if(length(cq.dates) == 1){
     quarters_achieved = 0
   }
@@ -186,12 +187,43 @@ for(i in 1:length(unique.ids)){
   abbie$cq8 <- ifelse(8 %in% quarters_achieved, sum(quarters_achieved == 8), 0)
   abbie$cq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
   
-  #Strict arrest days array for making abbie
+  
+
   abbie$num.arrests = 0
   arrests.abbie <- c(words$Arrest.Date)
   arrests.type <- words$Offense.Level
   if(!is.na(arrests.abbie)){
+    arrest_quarters = c()
+    arrest.dates.df = data.frame()
+      arrest.dates = c(words$Arrest.Date)
+      for(i in 1:length(arrest.dates)){
+        arrest.dates = sort(arrest.dates)
+        arrest.dates.df.1 = data.frame(arrest.dates = arrest.dates[i],
+                               quarter  = max(which(arrest.dates[i] > dates)))
+        arrest.dates.df = rbind(arrest.dates.df, arrest.dates.df.1)
+        arrest.dates2 = arrest.dates
+        min.q = max(which(arrest.dates[i] > dates))
+        if(is.na(arrest.dates[i+1])){
+          arrest.dates[i + 1] = arrest.dates[i]
+    }
+    min.q = ifelse(arrest.dates[i+1] - arrest.dates[i] == 90, min.q, min.q)
+    max.q = min(which(arrest.dates[i] < dates))
+    arrest_quarters= c(arrest_quarters, min.q)
+    arrest.dates = arrest.dates2
+      }
+    
     abbie$num.arrests = length(arrests.abbie)
+    abbie$num.arrests1 = sum(arrest_quarters == 1, na.rm = T)
+    abbie$num.arrests2 = sum(arrest_quarters == 2, na.rm = T)
+    abbie$num.arrests3 = sum(arrest_quarters == 3, na.rm = T)
+    abbie$num.arrests4 = sum(arrest_quarters == 4, na.rm = T)
+    abbie$num.arrests5 = sum(arrest_quarters == 5, na.rm = T)
+    abbie$num.arrests6 = sum(arrest_quarters == 6, na.rm = T)
+    abbie$num.arrests7 = sum(arrest_quarters == 7, na.rm = T)
+    abbie$num.arrests8 = sum(arrest_quarters == 8, na.rm = T)
+    abbie$num.arrests9 = sum(arrest_quarters == 9, na.rm = T)
+    
+    
     if(length(arrests.abbie) == 1){
       abbie$arrest1 <- arrests.abbie
       abbie$arrest1type <- arrests.type
@@ -422,8 +454,6 @@ for(i in 1:length(unique.ids)){
   
   #Ever arrested indicator variable
   abbie$ever.arrested <- ifelse(any(is.na(arrests.abbie)), 0, 1)
-  
-  
   #Which quarter were you arrested in calculation
   arrests = c(words$Arrest.Date)
   arrest.quarter.list = c()
@@ -566,6 +596,7 @@ The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. P
 ## Criminal Justice History
 Here is both a table and an accompanying graph of the arrests by population enrollment in both cohorts.
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
+
 pfs_pop = colSums(pfs[,c(20:28)])
 pfs_clean = colSums(pfs[,c(31:39)])
 pfs_a = pfs_pop - pfs_clean
@@ -581,6 +612,35 @@ other_a <- data.frame(index = c(1:9),
                     arrests = other_a)
 other_pop = data.frame(index = c(1:9),
                      pop = other_pop)
+
+final <- data.frame(clean = c(),
+                    potential = c())
+for(i in 1:9){
+  word.used.p = paste0('pq', i)
+  word.used.c = paste0('cq', i)
+  
+  df = data.frame(clean = sum(pfs[[word.used.p]]),
+                  potential =sum(pfs[[word.used.c]]))
+  final = rbind(final, df)
+}
+
+final2 <- data.frame(clean = c(),
+                    potential = c())
+for(i in 1:9){
+  word.used.p = paste0('pq', i)
+  word.used.c = paste0('cq', i)
+  
+  df = data.frame(clean = sum(other[[word.used.p]]),
+                  potential =sum(other[[word.used.c]]))
+  final2 = rbind(final2, df)
+}
+
+final$group = 'pfs'
+final2$group = 'other'
+final = rbind(final, final2)
+final$people = final$potential - final$clean
+arrest.type = pfs[,c(54:57, 62:65, 67)]
+
 
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
@@ -646,4 +706,7 @@ supplemental = read.csv('supplemental_new.csv')
 ## Summary
 
 ## Cohort 2 Preview
+
+## P-value explanation
+p-value is subjective, at experimental levels it is set at .05. This means long-term we expect these samples to occur this way 5% of the time. We deem a 5% chance for it to happen to be a statistical irregularity. For some particle physics experiments the burden of proof is set at 0.0000001, i.e. one in 100,000,000 times. 
 
