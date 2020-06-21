@@ -1,5 +1,5 @@
 ---
-title: "supplemental"
+title: "VCPA Supplemental Analysis - Skin and Bones Draft"
 author: "Mitchell Schepps"
 date: "6/19/2020"
 output: pdf_document
@@ -8,6 +8,49 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+
+## VCPA Rehabilitation Program
+VCPA launched on October 23, 2017 by Interface Children & Family Services (ICFS or ”Interface”)
+and Social Finance (SFI). ICFS is a trusted nonprofit social services agency, serving Ventura County’s
+children and families since 1973 with an annual budget of $7.5 million. Social Finance US is a 501(c)(3)
+nonprofit organization dedicated to mobilizing capital to drive social progress and is a sister company
+to Social Finance UK which has served successful programs since 2010. Social Finance applied for and
+was awarded a supplemental funding grant from the Nonprofit Finance Fund via the California Pay for
+Success Initiative. The award is aimed at advancing the PFS field in California by providing funding for
+additional needs for recidivism projects. In the case of VCPA, the grant is intended to go toward several
+activities, including: additional feasibility work conducted by Social Finance for the County, support for
+travel expenses, and additional data analysis to be performed by UCLA. There is limited government
+funding for community based reentry support for this project’s target population: medium- and high-risk
+individuals on formal probation.
+
+VCPA will consist of Interface randomizing 800 probationers into a PFS group and probation as usual
+group where probationers in the PFS group are provided a suite of personalized reentry support services
+for 3 years. The support services include moral reconation therapy, trauma therapy, relationship skills
+building, and employment support and placement. Each of the 800 probationers are followed for at most
+12 quarters. Any subsequent arrests post-release are recorded. This will lead to a measured outcome of
+the total number of ”clean quarters” described below where there are no arrests within a 90-day period
+as well as the overall re-arrest rate per group. The randomized control trial is not explicitly designed to
+inform which of Interface’s services and interim outcomes achieved were correlated to decreased recidivism.
+It simply gives a count of two groups and their rearrest rate. To gain further insight into these additional
+interim outcomes and questions, Interface and Social Finance worked together to develop and implement
+a case manager and client self-report questionnaire survey, to be filled out every 3 months post-enrollment
+into Interface’s services. These surveys were distributed via SurveyMonkey. The goal of the additional
+survey is to provide deeper understanding of interim outcomes pertaining to clients’ progress as they receive
+services and identify some of the underlying causes behind the achievement (or lack thereof) of the Project’s
+final recidivism outcomes. It will serve as a guidepost for future design of recidivism/reentry projects in
+communities across the country.
+
+The VCPA Rehabiliation Program has been running since 10-23-2017. It's main purpose is to rehabilitate recently incarcerated individuals, and provide them a case manager, or a person to help guide them into a healthy way of living. The case manager and the parolees meet individually, discuss options such as cognitive behavioral therapy and substance abuse, and VCPA maintains rearrest information on these parolees. UCLA was hired to run a clean quarter analysis 
+
+The document is set up as follows: 
+\begin{itemize}
+  \item thoroughly cover the collection and randomization schema
+  \item describe the demographics of each group
+  \item describe different aspects of arrest rates
+  \item describe arrest statistics by race, gender, and ORAS risk level
+  \item analyze social and psychological measures between those rearrested and those not rearrested
+\end{itemize}
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 library(dplyr)
@@ -820,7 +863,41 @@ chisq.test(final$f, final2$f)
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
 
-## Broken down by risk factors
+## Stratification Analysis - Gender, Race, and ORAS Risk Level
+
+### Broken down by gender
+
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+
+# rowSums(table(pfs$gender, pfs$num.arrests)[,-1])
+# rowSums(table(other$gender, other$num.arrests)[,-1])
+gender_df = data.frame(gender = c('Female', 'Male'), 
+                     pfs = c(17, 82),
+                     other = c(23,99))
+M <- as.table(rbind(gender_df[,2], gender_df[,3]))
+
+gender_df$pval = c(round(chisq.test(M)$p.value, 4), '-')
+#kable(gender_df)
+gender_df
+```
+
+### Broken down by race
+Ventura county is predominantly a hispanic community.
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+# 
+# rowSums(table(pfs$race, pfs$num.arrests)[,-1])
+# rowSums(table(other$race, other$num.arrests)[,-1])
+race_df = data.frame(race = c('Hispanic', 'White', 'Black', 'Other'), 
+                     pfs = c(55,38,4,2),
+                     other = c(77,31,10,4))
+M <- as.table(rbind(race_df[,2], race_df[,3]))
+
+race_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-')
+#kable(race_df)
+race_df
+```
+
+### Broken down by ORAS Risk Level
 We further analyze the arrest rates between groups by looking at the stratification of arrests by ORAS risk score. We see both the unique number of individuals being rearrested and the total number of arrests between groups is not signficiantly different. 
 
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
@@ -837,38 +914,9 @@ risk_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-', '-')
 risk_df
 ```
 
-## Broken down by race
-Ventura county is predominantly a hispanic community.
-```{r, echo=FALSE, warning = F, cache = T, message=F}
-# 
-# rowSums(table(pfs$race, pfs$num.arrests)[,-1])
-# rowSums(table(other$race, other$num.arrests)[,-1])
-race_df = data.frame(race = c('Hispanic', 'White', 'Black', 'Other'), 
-                     pfs = c(55,38,4,2),
-                     other = c(77,31,10,4))
-M <- as.table(rbind(race_df[,2], race_df[,3]))
-
-race_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-')
-#kable(race_df)
-race_df
-```
 
 
-## Broken down by gender
 
-```{r, echo=FALSE, warning = F, cache = T, message=F}
-
-# rowSums(table(pfs$gender, pfs$num.arrests)[,-1])
-# rowSums(table(other$gender, other$num.arrests)[,-1])
-gender_df = data.frame(gender = c('Female', 'Male'), 
-                     pfs = c(17, 82),
-                     other = c(23,99))
-M <- as.table(rbind(gender_df[,2], gender_df[,3]))
-
-gender_df$pval = c(round(chisq.test(M)$p.value, 4), '-')
-#kable(gender_df)
-gender_df
-```
 ## Services Received
 The question is, out of those who were randomized to be in our RCT, were there differences between those arrested and those not arrested? People were offered difference certives or cognitive behavioral therapy. These included case management, MRT, triple P, seek safety, job readiness, and other CBT.
 ```{r, echo=FALSE, warning = F, cache = T, message=F}
@@ -919,6 +967,12 @@ We see that of those not arrested, those individuals are using more of the servi
 
 ## Cohort 2 Preview
 
+## Statistical Tests
+A ch
+
 ## P-value explanation
 p-value is subjective, at experimental levels it is set at .05. This means long-term we expect these samples to occur this way 5% of the time. We deem a 5% chance for it to happen to be a statistical irregularity. For some particle physics experiments the burden of proof is set at 0.0000001, i.e. one in 100,000,000 times. 
 A key point of p-values which is often glossed over is the event of multiple testing. The idea from multiple testing can be pictured as searching through 100 different rooms for evidence. Odds are by chance you will find a room that is significant, but does that mean that 
+
+## COVID Analysis
+With the genuity of the COVID-19 pandemic, we saw dramatic reductions of in-person hearings. Some hearings were moved to online. In fact, police officers were told to arrest less on the minor offenses. We used a date of March 21, 2020 as the cut-off between COVID-19 policy enaction. This as of the date of the publication, only affected two months of Cohort 1 and up to 6 total for them. As of today, the policies remain the same in Ventura county. Quarantine has not been lifted. We tested to see if the arrest rates for both groups remained similar or experienced a similar drop-off after the cutoff.
