@@ -8,27 +8,54 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Table of Contents (Pages not aligned yet)
 
+\begin{enumerate}
+  \item VCPA Rehabilitation Program Description
+  \item Data Collection with graphic
+  \item Statistical Analysis description
+  \begin{itemize}
+    \item t-tests and chi-squared tests
+    \item p-value explanation and multiple hypothesis testing
+  \end{itemize}
+  \item Demographics analysis by group
+  \item Arrest information by group
+  \item Stratification
+  \begin{itemize}
+    \item Gender Arrest Analysis
+    \item Race Arrest Analysis
+    \item ORAS Risk Level Arrest Analysis
+  \end{itemize}
+  \item Supplemental Analysis Description
+  \item Supplemental Comparison (Those arrested vs never arrested)
+  \item COVID-19 Analysis
+  \item Summary
+  \item Discussion
+  \item Cohort 2 Preview
+\end{enumerate}
 
 ## VCPA Rehabilitation Program
-VCPA launched on October 23, 2017 by Interface Children & Family Services (ICFS or ”Interface”)
-and Social Finance (SFI). ICFS is a trusted nonprofit social services agency, serving Ventura County’s
+
+Ventura County Project to Support Reentry (VCPA) launched on October 23, 2017 by Interface Children & Family Services (ICFS or ”Interface”) and Social Finance (SFI). ICFS is a trusted nonprofit social services agency, serving Ventura County’s
 children and families since 1973 with an annual budget of $7.5 million. Social Finance US is a 501(c)(3)
 nonprofit organization dedicated to mobilizing capital to drive social progress and is a sister company
 to Social Finance UK which has served successful programs since 2010. Social Finance applied for and
 was awarded a supplemental funding grant from the Nonprofit Finance Fund via the California Pay for
-Success Initiative. The award is aimed at advancing the PFS field in California by providing funding for
+Success Initiative. Pay for Success (PFS) is an approach to outcomes-based funding. PFS gives payment for service to
+achievements exhibiting measurable progress and outcomes. It has been used to fund efforts like early
+education, job training, criminal justice reform, and health interventions where desired outcomes such as
+long-term employment, school readiness, and better health occur over time. This specific award is aimed at advancing the PFS field in California by providing funding for
 additional needs for recidivism projects. In the case of VCPA, the grant is intended to go toward several
 activities, including: additional feasibility work conducted by Social Finance for the County, support for
 travel expenses, and additional data analysis to be performed by UCLA. There is limited government
 funding for community based reentry support for this project’s target population: medium- and high-risk
 individuals on formal probation.
 
-VCPA will consist of Interface randomizing 800 probationers into a PFS group and probation as usual
+VCPA will consist of Interface randomizing probationers into a PFS group and probation as usual
 group where probationers in the PFS group are provided a suite of personalized reentry support services
 for 3 years. The support services include moral reconation therapy, trauma therapy, relationship skills
-building, and employment support and placement. Each of the 800 probationers are followed for at most
-12 quarters. Any subsequent arrests post-release are recorded. This will lead to a measured outcome of
+building, and employment support and placement. Each of the probationers are followed for at most
+6 quarters. Any subsequent arrests post-release are recorded. This will lead to a measured outcome of
 the total number of ”clean quarters” described below where there are no arrests within a 90-day period
 as well as the overall re-arrest rate per group. The randomized control trial is not explicitly designed to
 inform which of Interface’s services and interim outcomes achieved were correlated to decreased recidivism.
@@ -41,22 +68,12 @@ services and identify some of the underlying causes behind the achievement (or l
 final recidivism outcomes. It will serve as a guidepost for future design of recidivism/reentry projects in
 communities across the country.
 
-The VCPA Rehabiliation Program has been running since 10-23-2017. It's main purpose is to rehabilitate recently incarcerated individuals, and provide them a case manager, or a person to help guide them into a healthy way of living. The case manager and the parolees meet individually, discuss options such as cognitive behavioral therapy and substance abuse, and VCPA maintains rearrest information on these parolees. UCLA was hired to run a clean quarter analysis 
-
-The document is set up as follows: 
-\begin{itemize}
-  \item thoroughly cover the collection and randomization schema
-  \item describe the demographics of each group
-  \item describe different aspects of arrest rates
-  \item describe arrest statistics by race, gender, and ORAS risk level
-  \item analyze social and psychological measures between those rearrested and those not rearrested
-\end{itemize}
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 library(dplyr)
 library(plyr)
 library(ggplot2)
-# library(#kableExtra)
+library(kableExtra)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
@@ -693,7 +710,17 @@ other <- pas
 ```
 
 ## Data Collection
-We analyze individuals for 6 observational periods of 90 days. We call these 90 day subsets quarters, and label them quarter 1, quarter 2, and so forth. Cohort 1 collection ends at 6/1/2019, and our observation for them continues through 10/1/19. The cohort 1 enrollment took in `r dim(abbie.final2)[1]` parolees, randomizing `r table(abbie.final2$RandomGroup)[1]` into the Pay for Success program. When we say "between groups", which we will refer to often, we mean between individuals in the Pay for Success program and those in the Control group. Due to NCC processes, `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` people were removed and `r dim(pfs)[1]` were analyzed from start to finish. The other `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` individuals were analyzed for __ of the __ potential quarters before being removed. 
+
+Individuals were recruited ________________. 
+We analyze individuals for 6 observational periods of 90 days. We call these 90 day subsets quarters, and label them quarter 1, quarter 2, and so forth. Cohort 1 collection ended on 6/1/2019, and our observation for them continues through 10/1/20. The cohort 1 enrollment took in `r dim(abbie.final2)[1]` parolees, randomizing `r table(abbie.final2$RandomGroup)[1]` into the Pay for Success program. When we say "between groups", which we will refer to often, we mean between individuals in the Pay for Success program and those in the Control group. Due to NCC processes, `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` people were removed and `r dim(pfs)[1]` were analyzed from start to finish. The other `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` individuals were analyzed for __ of the __ potential quarters before being removed. 
+
+## Statistical Analysis
+
+Demographics were anlayzed for difference between groups. We looked for specific differences between the PFS and control group. 
+
+#### P-value explanation
+p-value is subjective, at experimental levels it is set at .05. This means long-term we expect these samples to occur this way 5% of the time. We deem a 5% chance for it to happen to be a statistical irregularity. For some particle physics experiments the burden of proof is set at 0.0000001, i.e. one in 100,000,000 times. 
+A key point of p-values which is often glossed over is the event of multiple testing. The idea from multiple testing can be pictured as searching through 100 different rooms for evidence. Odds are by chance you will find a room that is significant, but does that mean that 
 
 ## Demographics
 The demographic variables were supposed to match up between the groups. If they did not, we would have to implement some proportion matching to equate the populations. Table 1 below shows no significant differences between the demographics of Pay for Success Group and the Control group.
@@ -737,8 +764,8 @@ demo_df = data.frame(variable = c('n', 'Age, Mean (SD)', 'Female/Male', 'Race', 
                      other = c(nother, other_age, paste(other_gender[1,2], other_gender[2,2], sep = '/'), '', other_race[3,2], other_race[4,2], other_race[1,2], other_race[2,2], '', other_risk.level[3,2], other_risk.level[4,2], other_risk.level[5,2],
                              other_risk.level[2,2], other_risk.level[6,2]),
                      pval = c('-', round(age_p, 4), round(gender_p, 4), round(race_p, 4), '-', '-', '-', '-', round(risk_p, 4),  '-', '-', '-', '-', '-'))
-#kable(demo_df)
-demo_df
+kable(demo_df)
+
 ```
 The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. Predominantly male and predominantly hispanic. The ORAS score follows a moderately normal distribution and again is not significantly different between groups.
 
@@ -849,20 +876,28 @@ pls.m = pls[c(3,5,7,9,12,14,16,18,20),]
 pls2.f = pls2[c(2,4,6,8,10,12,14,16,19),]
 pls2.m = pls2[c(3,5,7,9,11,13,15,17,20),]
 
-final$m = pls.m[,2]
-final$f = pls.f[,2]
-final2$m = pls2.m[,2]
-final2$f = pls2.f[,2]
+final$misdemeanor = pls.m[,2]
+final$felony = pls.f[,2]
+final2$misdemeanor = pls2.m[,2]
+final2$felony = pls2.f[,2]
 
 final3 = rbind(final, final2)
-final
-final2
-chisq.test(final$m, final2$m)
-chisq.test(final$f, final2$f)
+
+kable(final)
+kable(final2)
+
 
 ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 ```
+Difference in misdemeanors chi square
 
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+chisq.test(final$m, final2$m)
+```
+Difference in felonies chi square
+```{r, echo=FALSE, warning = F, cache = T, message=F}
+chisq.test(final$f, final2$f)
+```
 ## Stratification Analysis - Gender, Race, and ORAS Risk Level
 
 ### Broken down by gender
@@ -877,8 +912,8 @@ gender_df = data.frame(gender = c('Female', 'Male'),
 M <- as.table(rbind(gender_df[,2], gender_df[,3]))
 
 gender_df$pval = c(round(chisq.test(M)$p.value, 4), '-')
-#kable(gender_df)
-gender_df
+kable(gender_df)
+
 ```
 
 ### Broken down by race
@@ -893,8 +928,8 @@ race_df = data.frame(race = c('Hispanic', 'White', 'Black', 'Other'),
 M <- as.table(rbind(race_df[,2], race_df[,3]))
 
 race_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-')
-#kable(race_df)
-race_df
+kable(race_df)
+
 ```
 
 ### Broken down by ORAS Risk Level
@@ -910,8 +945,8 @@ risk_df = data.frame(risk.level = c('Low', 'Low/Moderate', 'Moderate', 'High', '
 M <- as.table(rbind(risk_df[,2], risk_df[,3]))
 
 risk_df$pval = c(round(chisq.test(M)$p.value, 4), '-', '-', '-', '-')
-#kable(risk_df)
-risk_df
+kable(risk_df)
+
 ```
 
 
@@ -923,7 +958,6 @@ The question is, out of those who were randomized to be in our RCT, were there d
 setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 supplemental = read.csv('supplemental_new.csv')
 
-table(supplemental$Case_Management)
 services = data.frame(services = c('Any CBT','Case Management', 'MRT', "Triple P", "Seek Safety", 'Job Readiness', 'Other CBT'))
 services$prop = 0
 for(i in 7:12){
@@ -958,21 +992,18 @@ for(i in 130:146){
 }
 services2[1,2] = 1
 services2[1,3] = 1
-chisq.test(rbind(services2$never, services2$ever))
-services2
+services2$pval = '-'
+services2$pval[1] = 1.000
+# chisq.test(rbind(services2$never, services2$ever))
+kable(services2[1:5,])
+kable(services2[6:23,])
+
 ```
-We see that of those not arrested, those individuals are using more of the services. It appears that services lessens the possibility of receiving services. Further, in the SSM calculation, each category had a higher mean 
+We see that of those not arrested, those individuals are using more of the services. It appears that services lessens the possibility of receiving services. Further, in the SSM calculation, each category had a higher mean yet not a significant difference
 
 ## Summary
 
 ## Cohort 2 Preview
-
-## Statistical Tests
-A ch
-
-## P-value explanation
-p-value is subjective, at experimental levels it is set at .05. This means long-term we expect these samples to occur this way 5% of the time. We deem a 5% chance for it to happen to be a statistical irregularity. For some particle physics experiments the burden of proof is set at 0.0000001, i.e. one in 100,000,000 times. 
-A key point of p-values which is often glossed over is the event of multiple testing. The idea from multiple testing can be pictured as searching through 100 different rooms for evidence. Odds are by chance you will find a room that is significant, but does that mean that 
 
 ## COVID Analysis
 With the genuity of the COVID-19 pandemic, we saw dramatic reductions of in-person hearings. Some hearings were moved to online. In fact, police officers were told to arrest less on the minor offenses. We used a date of March 21, 2020 as the cut-off between COVID-19 policy enaction. This as of the date of the publication, only affected two months of Cohort 1 and up to 6 total for them. As of today, the policies remain the same in Ventura county. Quarantine has not been lifted. We tested to see if the arrest rates for both groups remained similar or experienced a similar drop-off after the cutoff.
