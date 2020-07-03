@@ -43,8 +43,8 @@ library(kableExtra)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
-pop <- read.csv('UCLAQuarterlyReportMarch2020Population.csv', skip = 1)
-arrests <- read.csv('UCLAQuarterlyReportMarch2020Arrests.csv')
+pop <- read.csv('UCLAQuarterlyReportJune2020Population.csv', skip = 1)
+arrests <- read.csv('UCLAQuarterlyReportJune2020Arrests.csv')
 # 
 # pop <- read.csv('UCLAQuarterlyReportDecember2019Population.csv', skip = 1)
 # arrests <- read.csv('UCLAQuarterlyReportDecember2019Arrests.csv')
@@ -79,9 +79,9 @@ names(arrests)[1] <- 'id'
 # ncc = ncc[-dup, ]
 setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 #New ncc
-ncc = read.csv('ncc_420.csv', skip = 9)
+ncc = read.csv('ncc_531.csv', skip = 9)
 names(ncc)[1] = 'id'
-names(ncc)[8] = 'ncc_date'
+names(ncc)[9] = 'ncc_date'
 ncc = ncc[, c('id', 'ncc_date')]
 
 #Merge population dataset and arrest dataset and ncc dataset
@@ -148,9 +148,6 @@ for(i in 1:length(unique.ids)){
                       day540 = cq.dates[7],
                       day541 = cq.dates[7] + 1,
                       day630 = cq.dates[8]
-                      # day540 = cq.dates[6] + 90,
-                      # day541 = cq.dates[6] + 91,
-                      # day630 = cq.dates[6] + 180
   )
   
   #Fix two specific dates
@@ -172,6 +169,11 @@ for(i in 1:length(unique.ids)){
     cq.dates[2] = x + 1
   }
   x = as.Date('2020-04-01', format = '%Y-%m-%d')
+  if(any(cq.dates == x)){
+    placement = which(cq.dates == x)
+    cq.dates[placement] = x + 1
+  }
+    x = as.Date('2020-07-01', format = '%Y-%m-%d')
   if(any(cq.dates == x)){
     placement = which(cq.dates == x)
     cq.dates[placement] = x + 1
@@ -212,7 +214,8 @@ for(i in 1:length(unique.ids)){
   abbie$cq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   abbie$cq8 <- ifelse(8 %in% quarters_achieved, sum(quarters_achieved == 8), 0)
   abbie$cq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
-  
+  abbie$cq10 <- ifelse(10 %in% quarters_achieved, sum(quarters_achieved == 10), 0)
+
   
 
   abbie$num.arrests = 0
@@ -248,7 +251,8 @@ for(i in 1:length(unique.ids)){
     abbie$num.arrests7 = sum(arrest_quarters == 7, na.rm = T)
     abbie$num.arrests8 = sum(arrest_quarters == 8, na.rm = T)
     abbie$num.arrests9 = sum(arrest_quarters == 9, na.rm = T)
-    
+    abbie$num.arrests10 = sum(arrest_quarters == 10, na.rm = T)
+
     arrests.abbie = sort(arrests.abbie)
     if(length(arrests.abbie) == 1){
       abbie$arrest1 <- arrests.abbie
@@ -612,7 +616,8 @@ for(i in 1:length(unique.ids)){
   arrest.inter$sev = sum(arrest.quarter.list == 7)
   arrest.inter$eig = sum(arrest.quarter.list == 8)
   arrest.inter$nin = sum(arrest.quarter.list == 9)
-  
+  arrest.inter$ten = sum(arrest.quarter.list == 10)
+
   arrest.matrix = rbind(arrest.matrix, arrest.inter)
   #Not sure if this will fix the issue where 2 potential quarters, but both were arrested in.
   duplicated_quarters = quarters_achieved[which(duplicated(quarters_achieved) & quarters_achieved %in% arrest.quarter.list)]
@@ -628,7 +633,8 @@ for(i in 1:length(unique.ids)){
   abbie$pq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   abbie$pq8 <- ifelse(8 %in% quarters_achieved, sum(quarters_achieved == 8), 0)
   abbie$pq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
-  
+  abbie$pq10 <- ifelse(10 %in% quarters_achieved, sum(quarters_achieved == 10), 0)
+
   
   abbie[abbie$id == 3334613, 'cq5'] = 0
   abbie[abbie$id == 3334613, 'cq6'] = 1
@@ -651,6 +657,8 @@ for(i in 1:length(unique.ids)){
                             ifelse(abbie$cq8 != 0 & abbie$pq8 == 0, 0, NA))
   abbie$jan_mar20 <- ifelse(abbie$cq9 != 0 & abbie$pq9 != 0, abbie$pq9,
                             ifelse(abbie$cq9 != 0 & abbie$pq9 == 0, 0, NA))
+  abbie$apr_june20 <- ifelse(abbie$cq10 != 0 & abbie$pq10 != 0, abbie$pq10,
+                            ifelse(abbie$cq10 != 0 & abbie$pq10 == 0, 0, NA))
 
   ncc_date = unique(words$ncc_date)
   abbie$ncc = ncc_date
@@ -668,7 +676,7 @@ pfs <- abbie.final2[abbie.final2$RandomGroup == 'Pay for Success',]
 pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]               
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
-pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
+pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('06/30/2020', format = '%m/%d/%Y'),])
 
 
 
@@ -724,6 +732,14 @@ demo_df = data.frame(variable = c('# of Sample Population Members', 'Age, Mean (
                      pval = c('-', round(age_p, 4), round(gender_p, 4), round(race_p, 4), '-', '-', '-', '-', round(risk_p, 4),  '-', '-', '-', '-', '-'))
 kable(demo_df)
 
+
+
+tab1 = data.frame(variable = c('# of Sample Population Members', 'Aggregate Number of Arrests', '# of Members Arrests 1+ times in 12 months', 'Mean Number of Arrests', 'Rate of Re-Arrest', 'Relative Reduction in Mean Number of Arrests', 'Relative Reduction in Rate of Re-Arrest'),
+                  'Control Group' = c(nother, sum(other$num.arrests), sum(other$ever.arrested), sum(other$num.arrests)/nother, sum(other$ever.arrested)/nother, (sum(other$num.arrests)/nother - sum(pfs$num.arrests)/npfs)/(sum(other$num.arrests)/nother), 2),
+                  'Service Group' = c(npfs, sum(pfs$num.arrests), sum(pfs$ever.arrested), sum(pfs$num.arrests)/npfs, sum(pfs$ever.arrested)/npfs, 2, (sum(other$ever.arrested)/nother - sum(pfs$ever.arrested)/npfs)/(sum(other$ever.arrested)/nother)))
+                    
+                
+kable(tab1)
 ```
 The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. Predominantly male and predominantly hispanic. The ORAS score follows a moderately normal distribution and again is not significantly different between groups.
 
