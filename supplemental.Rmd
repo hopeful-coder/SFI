@@ -34,40 +34,6 @@ knitr::opts_chunk$set(echo = TRUE)
   \item Cohort 2 Preview
 \end{enumerate}
 
-## VCPA Rehabilitation Program
-
-Ventura County Project to Support Reentry (VCPA) launched on October 23, 2017 by Interface Children & Family Services (ICFS or ”Interface”) and Social Finance (SFI). ICFS is a trusted nonprofit social services agency, serving Ventura County’s
-children and families since 1973 with an annual budget of $7.5 million. Social Finance US is a 501(c)(3)
-nonprofit organization dedicated to mobilizing capital to drive social progress and is a sister company
-to Social Finance UK which has served successful programs since 2010. Social Finance applied for and
-was awarded a supplemental funding grant from the Nonprofit Finance Fund via the California Pay for
-Success Initiative. Pay for Success (PFS) is an approach to outcomes-based funding. PFS gives payment for service to
-achievements exhibiting measurable progress and outcomes. It has been used to fund efforts like early
-education, job training, criminal justice reform, and health interventions where desired outcomes such as
-long-term employment, school readiness, and better health occur over time. This specific award is aimed at advancing the PFS field in California by providing funding for
-additional needs for recidivism projects. In the case of VCPA, the grant is intended to go toward several
-activities, including: additional feasibility work conducted by Social Finance for the County, support for
-travel expenses, and additional data analysis to be performed by UCLA. There is limited government
-funding for community based reentry support for this project’s target population: medium- and high-risk
-individuals on formal probation.
-
-VCPA will consist of Interface randomizing probationers into a PFS group and probation as usual
-group where probationers in the PFS group are provided a suite of personalized reentry support services
-for 3 years. The support services include moral reconation therapy, trauma therapy, relationship skills
-building, and employment support and placement. Each of the probationers are followed for at most
-6 quarters. Any subsequent arrests post-release are recorded. This will lead to a measured outcome of
-the total number of ”clean quarters” described below where there are no arrests within a 90-day period
-as well as the overall re-arrest rate per group. The randomized control trial is not explicitly designed to
-inform which of Interface’s services and interim outcomes achieved were correlated to decreased recidivism.
-It simply gives a count of two groups and their rearrest rate. To gain further insight into these additional
-interim outcomes and questions, Interface and Social Finance worked together to develop and implement
-a case manager and client self-report questionnaire survey, to be filled out every 3 months post-enrollment
-into Interface’s services. These surveys were distributed via SurveyMonkey. The goal of the additional
-survey is to provide deeper understanding of interim outcomes pertaining to clients’ progress as they receive
-services and identify some of the underlying causes behind the achievement (or lack thereof) of the Project’s
-final recidivism outcomes. It will serve as a guidepost for future design of recidivism/reentry projects in
-communities across the country.
-
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 library(dplyr)
@@ -714,14 +680,6 @@ other <- pas
 Individuals were recruited ________________. 
 We analyze individuals for 6 observational periods of 90 days. We call these 90 day subsets quarters, and label them quarter 1, quarter 2, and so forth. Cohort 1 collection ended on 6/1/2019, and our observation for them continues through 10/1/20. The cohort 1 enrollment took in `r dim(abbie.final2)[1]` parolees, randomizing `r table(abbie.final2$RandomGroup)[1]` into the Pay for Success program. When we say "between groups", which we will refer to often, we mean between individuals in the Pay for Success program and those in the Control group. Due to NCC processes, `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` people were removed and `r dim(pfs)[1]` were analyzed from start to finish. The other `r table(abbie.final2$RandomGroup)[1] - dim(pfs)[1]` individuals were analyzed for __ of the __ potential quarters before being removed. 
 
-## Statistical Analysis
-
-Demographics were anlayzed for difference between groups. We looked for specific differences between the PFS and control group. 
-
-#### P-value explanation
-p-value is subjective, at experimental levels it is set at .05. This means long-term we expect these samples to occur this way 5% of the time. We deem a 5% chance for it to happen to be a statistical irregularity. For some particle physics experiments the burden of proof is set at 0.0000001, i.e. one in 100,000,000 times. 
-A key point of p-values which is often glossed over is the event of multiple testing. The idea from multiple testing can be pictured as searching through 100 different rooms for evidence. Odds are by chance you will find a room that is significant, but does that mean that 
-
 ## Demographics
 The demographic variables were supposed to match up between the groups. If they did not, we would have to implement some proportion matching to equate the populations. Table 1 below shows no significant differences between the demographics of Pay for Success Group and the Control group.
 ```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
@@ -758,7 +716,7 @@ age_p = t.test(pfs$age, other$age)$p.value
 M <- as.table(rbind(as.numeric(pfs_risk.level[,2]), as.numeric(other_risk.level[,2])))
 risk_p = chisq.test(M)$p.value
 
-demo_df = data.frame(variable = c('n', 'Age, Mean (SD)', 'Female/Male', 'Race', 'White', 'Hispanic', 'Black', 'Other', 'ORAS Risk Level', 'Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'),
+demo_df = data.frame(variable = c('# of Sample Population Members', 'Age, Mean (SD)', 'Female/Male', 'Race', 'White', 'Hispanic', 'Black', 'Other', 'ORAS Risk Level', 'Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'),
                      pfs = c(npfs, pfs_age, paste(pfs_gender[1,2], pfs_gender[2,2], sep = '/'), '', pfs_race[3,2], pfs_race[4,2], pfs_race[1,2], pfs_race[2,2], '', pfs_risk.level[3,2], pfs_risk.level[4,2], pfs_risk.level[5,2],
                              pfs_risk.level[2,2], pfs_risk.level[6,2]),
                      other = c(nother, other_age, paste(other_gender[1,2], other_gender[2,2], sep = '/'), '', other_race[3,2], other_race[4,2], other_race[1,2], other_race[2,2], '', other_risk.level[3,2], other_risk.level[4,2], other_risk.level[5,2],

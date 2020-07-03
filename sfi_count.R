@@ -3,8 +3,8 @@ library(plyr)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
-pop <- read.csv('UCLAQuarterlyReportMarch2020Population.csv', skip = 1)
-arrests <- read.csv('UCLAQuarterlyReportMarch2020Arrests.csv')
+pop <- read.csv('UCLAQuarterlyReportJune2020Population.csv', skip = 1)
+arrests <- read.csv('UCLAQuarterlyReportJune2020Arrests.csv')
 # 
 # pop <- read.csv('UCLAQuarterlyReportDecember2019Population.csv', skip = 1)
 # arrests <- read.csv('UCLAQuarterlyReportDecember2019Arrests.csv')
@@ -24,8 +24,8 @@ names(pop)[1] <- 'id'
 names(arrests)[1] <- 'id'
 
 #Load in NCC Data
-ncc1 <- read.csv('ncc1_Jan20.csv', skip = 12, header = T)
-ncc2 <- read.csv('ncc2_Jan20.csv', skip = 12, header = T)
+# ncc1 <- read.csv('ncc1_Jan20.csv', skip = 12, header = T)
+# ncc2 <- read.csv('ncc2_Jan20.csv', skip = 12, header = T)
 
 #Clean up NCC Data for merging purposes
 # ncc1 <- ncc1[,-1]
@@ -42,9 +42,10 @@ ncc2 <- read.csv('ncc2_Jan20.csv', skip = 12, header = T)
 # ncc = ncc[-dup, ]
 setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 #New ncc
-ncc = read.csv('ncc_420.csv', skip = 9)
+ncc = read.csv('ncc_531.csv', skip = 9)
+
 names(ncc)[1] = 'id'
-names(ncc)[8] = 'ncc_date'
+names(ncc)[9] = 'ncc_date'
 ncc = ncc[, c('id', 'ncc_date')]
 
 #Merge population dataset and arrest dataset and ncc dataset
@@ -62,7 +63,7 @@ test2$Arrest.Date <- as.Date(test2$Arrest.Date, format = '%m/%d/%Y')
 
 #Sort out cohorts
 ash = test2
-test2 = test2[test2$X.5 < as.Date('06/01/2019', format = '%m/%d/%Y'),]
+# test2 = test2[test2$X.5 < as.Date('06/01/2019', format = '%m/%d/%Y'),]
 #Potential ids to watch out for.
 # test2 <- test2[!is.na(test2$Intake.Date), ]
 # test2 <- test2[!test2$id == 3239845,]
@@ -134,7 +135,13 @@ for(i in 1:length(unique.ids)){
   if(any(cq.dates == x)){
     cq.dates[2] = x + 1
   }
+  
   x = as.Date('2020-04-01', format = '%Y-%m-%d')
+  if(any(cq.dates == x)){
+    placement = which(cq.dates == x)
+    cq.dates[placement] = x + 1
+  }
+  x = as.Date('2020-07-01', format = '%Y-%m-%d')
   if(any(cq.dates == x)){
     placement = which(cq.dates == x)
     cq.dates[placement] = x + 1
@@ -173,6 +180,7 @@ for(i in 1:length(unique.ids)){
   abbie$cq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   abbie$cq8 <- ifelse(8 %in% quarters_achieved, sum(quarters_achieved == 8), 0)
   abbie$cq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
+  abbie$cq10 <- ifelse(10 %in% quarters_achieved, sum(quarters_achieved == 10), 0)
   
   #Strict arrest days array for making abbie
   abbie$num.arrests = 0
@@ -438,6 +446,7 @@ for(i in 1:length(unique.ids)){
   arrest.inter$sev = sum(arrest.quarter.list == 7)
   arrest.inter$eig = sum(arrest.quarter.list == 8)
   arrest.inter$nin = sum(arrest.quarter.list == 9)
+  arrest.inter$ten = sum(arrest.quarter.list == 10)
   
   arrest.matrix = rbind(arrest.matrix, arrest.inter)
   #Not sure if this will fix the issue where 2 potential quarters, but both were arrested in.
@@ -454,6 +463,7 @@ for(i in 1:length(unique.ids)){
   abbie$pq7 <- ifelse(7 %in% quarters_achieved, sum(quarters_achieved == 7), 0)
   abbie$pq8 <- ifelse(8 %in% quarters_achieved, sum(quarters_achieved == 8), 0)
   abbie$pq9 <- ifelse(9 %in% quarters_achieved, sum(quarters_achieved == 9), 0)
+  abbie$pq10 <- ifelse(10 %in% quarters_achieved, sum(quarters_achieved == 10), 0)
   
   
   abbie[abbie$id == 3334613, 'cq5'] = 0
@@ -477,6 +487,8 @@ for(i in 1:length(unique.ids)){
                             ifelse(abbie$cq8 != 0 & abbie$pq8 == 0, 0, NA))
   abbie$jan_mar20 <- ifelse(abbie$cq9 != 0 & abbie$pq9 != 0, abbie$pq9,
                             ifelse(abbie$cq9 != 0 & abbie$pq9 == 0, 0, NA))
+  abbie$apr_june20 <- ifelse(abbie$cq10 != 0 & abbie$pq10 != 0, abbie$pq10,
+                            ifelse(abbie$cq10 != 0 & abbie$pq10 == 0, 0, NA))
 
   ncc_date = unique(words$ncc_date)
   abbie$ncc = ncc_date
@@ -494,16 +506,16 @@ pfs <- abbie.final2[abbie.final2$RandomGroup == 'Pay for Success',]
 pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]               
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
-pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('03/31/2020', format = '%m/%d/%Y'),])
+pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('06/30/2020', format = '%m/%d/%Y'),])
 
-pfs$arrest9 = NULL
+# pfs$arrest9 = NULL
 
-# write.csv(pfs, 'Payforsuccess_flatfile_Mar20.csv', row.names = F)
+write.csv(pfs, 'Payforsuccess_flatfile_June20.csv', row.names = F)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
                     potential = c())
-for(i in 1:9){
+for(i in 1:10){
   word.used.p = paste0('pq', i)
   word.used.c = paste0('cq', i)
   
