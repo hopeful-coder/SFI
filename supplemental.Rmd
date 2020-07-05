@@ -7,6 +7,12 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(plyr)
+library(ggplot2)
+library(kableExtra)
+library(reshape2)
+
 ```
 ## Table of Contents (Pages not aligned yet)
 
@@ -40,6 +46,7 @@ library(dplyr)
 library(plyr)
 library(ggplot2)
 library(kableExtra)
+library(reshape2)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
@@ -691,6 +698,8 @@ We analyze individuals for 6 observational periods of 90 days. We call these 90 
 ## Demographics
 The demographic variables were supposed to match up between the groups. If they did not, we would have to implement some proportion matching to equate the populations. Table 1 below shows no significant differences between the demographics of Pay for Success Group and the Control group.
 ```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
+library(reshape2)
+comb_again = rbind(pfs, other)
 npfs = dim(pfs)[1]
 nother = dim(other)[1]
 pfs_age = paste0(round(mean(pfs$age), 1), ' (', round(sd(pfs$age), 1), ')')
@@ -720,16 +729,17 @@ race_p = chisq.test(M)$p.value
 gender_p = prop.test(c(pfs_gender[2,2], other_gender[2,2]), c(sum(pfs_gender[,2]), sum(other_gender[,2])))$p.value
 
 age_p = t.test(pfs$age, other$age)$p.value
+comb_again_age = paste0(round(mean(comb_again$age), 1), ' (', round(sd(comb_again$age), 1), ')')
 
 M <- as.table(rbind(as.numeric(pfs_risk.level[,2]), as.numeric(other_risk.level[,2])))
 risk_p = chisq.test(M)$p.value
 
-demo_df = data.frame(variable = c('# of Sample Population Members', 'Age, Mean (SD)', 'Female/Male', 'Race', 'White', 'Hispanic', 'Black', 'Other', 'ORAS Risk Level', 'Low', 'Low/Moderate', 'Moderate', 'High', 'Very High'),
-                     pfs = c(npfs, pfs_age, paste(pfs_gender[1,2], pfs_gender[2,2], sep = '/'), '', pfs_race[3,2], pfs_race[4,2], pfs_race[1,2], pfs_race[2,2], '', pfs_risk.level[3,2], pfs_risk.level[4,2], pfs_risk.level[5,2],
-                             pfs_risk.level[2,2], pfs_risk.level[6,2]),
-                     other = c(nother, other_age, paste(other_gender[1,2], other_gender[2,2], sep = '/'), '', other_race[3,2], other_race[4,2], other_race[1,2], other_race[2,2], '', other_risk.level[3,2], other_risk.level[4,2], other_risk.level[5,2],
-                             other_risk.level[2,2], other_risk.level[6,2]),
-                     pval = c('-', round(age_p, 4), round(gender_p, 4), round(race_p, 4), '-', '-', '-', '-', round(risk_p, 4),  '-', '-', '-', '-', '-'))
+demo_df = data.frame(variable = c('# of Sample Population Members', 'Age, Mean (SD)', 'Male', 'Female', 'Race', 'Latino/Hispanic', 'White', 'Black', 'Other'),
+                     pfs = c(npfs, pfs_age, paste0(round(prop.table(table(pfs$gender))[2]*100, 1), '%'), paste0(round(prop.table(table(pfs$gender))[1]*100, 1), '%'), '',  paste0(round(prop.table(table(pfs$race))[4]*100, 1), '%'), paste0(round(prop.table(table(pfs$race))[3]*100, 1), '%'), paste0(round(prop.table(table(pfs$race))[1]*100, 1), '%'), paste0(round(prop.table(table(pfs$race))[2]*100, 1), '%')),
+                     other = c(nother, other_age, paste0(round(prop.table(table(other$gender))[2]*100, 1), '%'), paste0(round(prop.table(table(other$gender))[1]*100, 1), '%'), '',  paste0(round(prop.table(table(other$race))[4]*100, 1), '%'), paste0(round(prop.table(table(other$race))[3]*100, 1), '%'), paste0(round(prop.table(table(other$race))[1]*100, 1), '%'), paste0(round(prop.table(table(other$race))[2]*100, 1), '%')),
+                     pval = c('-', round(age_p, 4), round(gender_p, 4), '-', round(race_p, 4), '-', '-', '-', '-'),
+                     overall = c(nrow(comb_again), comb_again_age, paste0(round(prop.table(table(comb_again$gender))[2]*100, 1), '%'), paste0(round(prop.table(table(comb_again$gender))[1]*100, 1), '%'), '',  paste0(round(prop.table(table(comb_again$race))[4]*100, 1), '%'), paste0(round(prop.table(table(comb_again$race))[3]*100, 1), '%'), paste0(round(prop.table(table(comb_again$race))[1]*100, 1), '%'), paste0(round(prop.table(table(comb_again$race))[2]*100, 1), '%')
+))
 kable(demo_df)
 
 
@@ -741,32 +751,52 @@ tab1 = data.frame(variable = c('# of Sample Population Members', 'Aggregate Numb
                 
 kable(tab1)
 ```
+
+```{r}
+pfs.risk = prop.table(table(pfs$risk.level))
+other.risk = prop.table(table(other$risk.level))
+risk.df = data.frame(risk.level = c('Low', 'Low/Moderate', 'Moderate', 'High', 'Very High', 'Undeclared'),
+                     'Service Group'        = c(pfs.risk[3], pfs.risk[4], pfs.risk[5], pfs.risk[2], pfs.risk[6], pfs.risk[1]),
+                     'Control Group'        = c(other.risk[3], other.risk[4], other.risk[5], other.risk[2], other.risk[6], other.risk[1]))
+risk.df = melt(risk.df, by = 'risk.level')
+risk.df$risk.level = factor(risk.df$risk.level, levels = c('Low', 'Low/Moderate', 'Moderate', 'High', 'Very High', 'Undeclared'))
+names(risk.df)[2] = 'Group'
+ggplot(data=risk.df, aes(x=risk.level, y=value, fill=Group)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=paste0(round(value*100, 1), '%')), vjust=1.6, color="white",
+            position = position_dodge(0.9), size=3.5)+
+  scale_fill_brewer(palette="Paired")+
+  labs(x = 'Risk Level', y = 'Percentage (%) of Group Population', title = 'Figure 1: ORAS Risk Level at Intake')+
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
 The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. Predominantly male and predominantly hispanic. The ORAS score follows a moderately normal distribution and again is not significantly different between groups.
 
 ## Criminal Justice History
 Here is both a table and an accompanying graph of the arrests by population enrollment in both cohorts.
-```{r, echo=FALSE, warning = F, cache = T, message=F}
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 
-pfs_pop = colSums(pfs[,c(20:28)])
-pfs_clean = colSums(pfs[,c(31:39)])
+pfs_pop = colSums(pfs[,c(20:29)])
+pfs_clean = colSums(pfs[,c(32:41)])
 pfs_a = pfs_pop - pfs_clean
-pfs_a <- data.frame(index = c(1:9),
+pfs_a <- data.frame(index = c(1:10),
                     arrests = pfs_a)
-pfs_pop = data.frame(index = c(1:9),
+pfs_pop = data.frame(index = c(1:10),
                   pop = pfs_pop)
 # ggplot() + geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
-other_pop = colSums(other[,c(20:28)])
-other_clean = colSums(other[,c(31:39)])
+other_pop = colSums(other[,c(20:29)])
+other_clean = colSums(other[,c(32:41)])
 other_a = other_pop - other_clean
-other_a <- data.frame(index = c(1:9),
+other_a <- data.frame(index = c(1:10),
                     arrests = other_a)
-other_pop = data.frame(index = c(1:9),
+other_pop = data.frame(index = c(1:10),
                      pop = other_pop)
 
 #Create dataframe for final numbers needed.
 final <- data.frame(clean = c(),
                     potential = c())
-for(i in 1:9){
+for(i in 1:10){
   word.used.p = paste0('pq', i)
   word.used.c = paste0('cq', i)
   
@@ -777,7 +807,7 @@ for(i in 1:9){
 #Create dataframe for final numbers needed.
 final2 <- data.frame(clean = c(),
                     potential = c())
-for(i in 1:9){
+for(i in 1:10){
   word.used.p = paste0('pq', i)
   word.used.c = paste0('cq', i)
   
@@ -788,19 +818,19 @@ for(i in 1:9){
 
 final$group = 'pfs'
 final2$group = 'other'
-final$num.arrests = colSums(pfs[,c(50:58)], na.rm = T)
-final2$num.arrests = colSums(other[,c(50:58)], na.rm = T)
+final$num.arrests = colSums(pfs[,c(53:62)], na.rm = T)
+final2$num.arrests = colSums(other[,c(53:62)], na.rm = T)
 
 people <- c()
 people2 <- c()
-for(i in 50:58){
+for(i in 53:62){
   test = pfs[,c(i)]
   test = test[!is.na(test)]
   test = test[test!=0]
   people = c(people, length(test))
 }
 
-for(i in 50:58){
+for(i in 53:62){
   test = other[,c(i)]
   test = test[!is.na(test)]
   test = test[test!=0]
@@ -810,7 +840,7 @@ final$people = people
 final2$people = people2
 
 
-aq_names = paste0('aq', 1:9)
+aq_names = paste0('aq', 1:10)
 aq_names = which(names(pfs) %in% aq_names)
 pfs$a1 = paste0(pfs$aq1, pfs$arrest1type)
 pfs$a2 = paste0(pfs$aq2, pfs$arrest2type)
@@ -821,8 +851,10 @@ pfs$a6 = paste0(pfs$aq6, pfs$arrest6type)
 pfs$a7 = paste0(pfs$aq7, pfs$arrest7type)
 pfs$a8 = paste0(pfs$aq8, pfs$arrest8type)
 pfs$a9 = paste0(pfs$aq9, pfs$arrest9type)
+pfs$a10 = paste0(pfs$aq10, pfs$arrest10type)
+
 pls = c()
-for(i in 88:96){
+for(i in 95:104){
   intermed = pfs[,i]
   pls = c(pls, intermed)
 }
@@ -836,19 +868,21 @@ other$a6 = paste0(other$aq6, other$arrest6type)
 other$a7 = paste0(other$aq7, other$arrest7type)
 other$a8 = paste0(other$aq8, other$arrest8type)
 other$a9 = paste0(other$aq9, other$arrest9type)
+other$a10 = paste0(other$aq10, other$arrest10type)
+
 pls2 = c()
-for(i in 88:96){
+for(i in 95:104){
   intermed = other[,i]
   pls2 = c(pls2, intermed)
 }
 
 pls = data.frame(table(pls))
 pls2 = data.frame(table(pls2))
-pls.f = pls[c(2,4,6,8,11,13,15,17,19),]
-pls.m = pls[c(3,5,7,9,12,14,16,18,20),]
+pls.f = pls[c(2,4,6,8,11,13,15,17,19,1),]
+pls.m = pls[c(3,5,7,9,12,14,16,18,20,1),]
 
-pls2.f = pls2[c(2,4,6,8,10,12,14,16,19),]
-pls2.m = pls2[c(3,5,7,9,11,13,15,17,20),]
+pls2.f = pls2[c(2,4,6,8,10,12,14,16,19,1),]
+pls2.m = pls2[c(3,5,7,9,11,13,15,17,20,1),]
 
 final$misdemeanor = pls.m[,2]
 final$felony = pls.f[,2]
@@ -861,7 +895,28 @@ kable(final)
 kable(final2)
 
 
-ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
+pop.df = data.frame(quarter = c(1:10),
+                       'Service Group' = pfs_pop[,2],
+                       'Control Group' = other_pop[,2])
+pop.df = melt(pop.df, id.vars = 'quarter')
+arrest.df = data.frame(quarter = c(1:10),
+                       'Service Group' = pfs_a[,2],
+                       'Control Group' = other_a[,2])
+arrest.df = melt(arrest.df, id.vars = 'quarter')
+
+names(pop.df)[2] = 'Group'
+names(arrest.df)[2] = 'Group'
+# ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
+
+ggplot(data=pop.df, aes(x=quarter, y=value, color=Group)) +
+  geom_line(stat="identity", position=position_dodge(), size = 4)+
+  geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), size = 3)+
+  geom_text(aes(label=paste0(round(value*100, 1), '%')), vjust=1.6, color="white",
+            position = position_dodge(0.9), size=3.5)+
+  scale_x_discrete()+
+  scale_fill_brewer(palette="Paired")+
+  labs(x = 'Quarter', y = 'Percentage (%) of Group Population')+
+  theme_minimal()
 ```
 Difference in misdemeanors chi square
 
@@ -932,8 +987,13 @@ The question is, out of those who were randomized to be in our RCT, were there d
 setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 supplemental = read.csv('supplemental_new.csv')
 
-services = data.frame(services = c('Any CBT','Case Management', 'MRT', "Triple P", "Seek Safety", 'Job Readiness', 'Other CBT'))
+services = data.frame(services = c('Case Management', 'MRT', "Triple P", "Seek Safety", 'Job Readiness', 'Other CBT'))
 services$prop = 0
+supplemental$anycbt = ifelse(supplemental$MRT == 1|supplemental$Case_Management == 1 |
+                               supplemental$Triple_P == 1|
+                               supplemental$Seek_Safety == 1|
+                               supplemental$JobReadiness == 1 |
+                               supplemental$Other_CBT == 1, 1, 0)
 for(i in 7:12){
   services$prop[i-6] = prop.table(table(supplemental[,i], useNA = 'always'))[2]
 }
@@ -952,18 +1012,18 @@ n.a = bigone[bigone$ever.arrested == 0,]
 services2 = data.frame(services = c('Case Management', 'MRT', "Triple P", "Seek Safety", 'Job Readiness', 'Other CBT', names(bigone)[130:146]))
 services2$never = 0
 services2$ever = 0
-for(i in 102:107){
-    services2$never[i-101] = prop.table(table(n.a[,i], useNA = 'always'))[2]
-    services2$ever[i-101]  = prop.table(table(e.a[,i], useNA = 'always'))[2]
+for(i in 100:105){
+    services2$never[i-99] = round(prop.table(table(n.a[,i], useNA = 'always'))[2]*100, 1)
+    services2$ever[i-99]  = round(prop.table(table(e.a[,i], useNA = 'always'))[2]*100, 1)
 }
-for(i in 130:146){
-  n.a[,i] = ifelse(n.a[,i] == 'NULL', NA, n.a[,i])
-  n.a[,i] = ifelse(n.a[,i] == 99, NA, n.a[,i])
-  e.a[,i] = ifelse(e.a[,i] == 'NULL', NA, e.a[,i])
-  e.a[,i] = ifelse(e.a[,i] == 99, NA, e.a[,i])
-  services2$never[i-123] = mean(n.a[,i], na.rm = T)
-  services2$ever[i-123] = mean(e.a[,i], na.rm = T)
-}
+# for(i in 130:146){
+#   n.a[,i] = ifelse(n.a[,i] == 'NULL', NA, n.a[,i])
+#   n.a[,i] = ifelse(n.a[,i] == 99, NA, n.a[,i])
+#   e.a[,i] = ifelse(e.a[,i] == 'NULL', NA, e.a[,i])
+#   e.a[,i] = ifelse(e.a[,i] == 99, NA, e.a[,i])
+#   services2$never[i-123] = mean(n.a[,i], na.rm = T)
+#   services2$ever[i-123] = mean(e.a[,i], na.rm = T)
+# }
 services2[1,2] = 1
 services2[1,3] = 1
 services2$pval = '-'
