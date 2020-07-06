@@ -908,15 +908,20 @@ names(pop.df)[2] = 'Group'
 names(arrest.df)[2] = 'Group'
 # ggplot() + geom_line(aes(x = index, y = arrests), data = other_a, linetype = 2) + geom_line(aes(x = index, y = pop), data = other_pop, linetype = 2)+ geom_line(aes(x = index, y = arrests), data = pfs_a) + geom_line(aes(x = index, y = pop), data = pfs_pop)
 
+
 ggplot(data=pop.df, aes(x=quarter, y=value, color=Group)) +
   geom_line(stat="identity", position=position_dodge(), size = 4)+
   geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), size = 3)+
-  geom_text(aes(label=paste0(round(value*100, 1), '%')), vjust=1.6, color="white",
-            position = position_dodge(0.9), size=3.5)+
-  scale_x_discrete()+
   scale_fill_brewer(palette="Paired")+
   labs(x = 'Quarter', y = 'Percentage (%) of Group Population')+
   theme_minimal()
+
+ggplot(data=pop.df, aes(x=quarter, y=value, color=Group)) +
++   geom_line(stat="identity", position=position_dodge(), size = 4)+
++   geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), linetype = 'dashed', size = 3)+
++   scale_fill_brewer(palette="Paired")+
++   labs(x = 'Quarter', y = 'Total Population /Arrests', title = 'Supplemental Figure: Population and Arrests of Cohort 1 Per Quarter')+
++   theme_minimal()+scale_x_continuous("Quarter", labels = as.character(pop.df$quarter), breaks = pop.df$quarter)
 ```
 Difference in misdemeanors chi square
 
