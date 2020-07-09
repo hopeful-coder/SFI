@@ -683,7 +683,7 @@ pfs <- abbie.final2[abbie.final2$RandomGroup == 'Pay for Success',]
 pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]               
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
-pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('06/30/2020', format = '%m/%d/%Y'),])
+pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('05/31/2020', format = '%m/%d/%Y'),])
 
 
 
@@ -750,6 +750,12 @@ tab1 = data.frame(variable = c('# of Sample Population Members', 'Aggregate Numb
                     
                 
 kable(tab1)
+
+ncc2 = pfs[!is.na(pfs$ncc), ]
+reg = pfs[is.na(pfs$ncc),]
+
+person.time = rowSums(!is.na(pfs[,42:51]))
+
 ```
 
 ```{r}
@@ -1036,6 +1042,39 @@ services2$pval[1] = 1.000
 # chisq.test(rbind(services2$never, services2$ever))
 kable(services2[1:5,])
 kable(services2[6:23,])
+
+bigone$MRT_Step_Achieved = as.numeric(as.character(bigone$MRT_Step_Achieved))
+prop.table(table(bigone$Case_Management_Progress, bigone$ever.arrested), 2)
+prop.table(table(bigone$MRT, bigone$ever.arrested),2)
+tapply(as.numeric(as.character(bigone$MRT_Step_Achieved)), bigone$ever.arrested, mean, na.rm = T)
+tapply(as.numeric(as.character(bigone$MRT_Step_Achieved)), bigone$ever.arrested, sd, na.rm = T)
+mean(bigone$MRT_Step_Achieved)
+sd(bigone$MRT_Step_Achieved)
+
+prop.table(table(bigone$JobReadiness, bigone$ever.arrested),2)
+prop.table(table(bigone$Triple_P, bigone$ever.arrested),2)
+prop.table(table(bigone$Seek_Safety, bigone$ever.arrested),2)
+
+
+bigone$Triple_P_Modules_completed = as.numeric(as.character(bigone$Triple_P_Modules_completed))
+tapply(as.numeric(as.character(bigone$Triple_P_Modules_completed)), bigone$ever.arrested, mean, na.rm = T)
+tapply(as.numeric(as.character(bigone$Triple_P_Modules_completed)), bigone$ever.arrested, sd, na.rm = T)
+mean(bigone$Triple_P_Modules_completed, na.rm = T)
+sd(bigone$Triple_P_Modules_completed, na.rm = T)
+
+bigone$JR_Step_Achieved = as.numeric(as.character(bigone$JR_Step_Achieved))
+tapply(as.numeric(as.character(bigone$JR_Step_Achieved)), bigone$ever.arrested, mean, na.rm = T)
+tapply(as.numeric(as.character(bigone$JR_Step_Achieved)), bigone$ever.arrested, sd, na.rm = T)
+mean(bigone$JR_Step_Achieved, na.rm = T)
+sd(bigone$JR_Step_Achieved, na.rm = T)
+
+
+bigone$SeekSafety_Modules_completed = as.numeric(as.character(bigone$SeekSafety_Modules_completed))
+tapply(as.numeric(as.character(bigone$SeekSafety_Modules_completed)), bigone$ever.arrested, mean, na.rm = T)
+tapply(as.numeric(as.character(bigone$SeekSafety_Modules_completed)), bigone$ever.arrested, sd, na.rm = T)
+mean(bigone$SeekSafety_Modules_completed, na.rm = T)
+sd(bigone$SeekSafety_Modules_completed, na.rm = T)
+
 
 ```
 We see that of those not arrested, those individuals are using more of the services. It appears that services lessens the possibility of receiving services. Further, in the SSM calculation, each category had a higher mean yet not a significant difference
