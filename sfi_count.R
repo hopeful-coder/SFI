@@ -42,7 +42,7 @@ names(arrests)[1] <- 'id'
 # ncc = ncc[-dup, ]
 setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 #New ncc
-ncc = read.csv('ncc_531.csv', skip = 9)
+ncc = read.csv('ncc_630.csv', skip = 9)
 
 names(ncc)[1] = 'id'
 names(ncc)[9] = 'ncc_date'
@@ -94,11 +94,13 @@ for(i in 1:length(unique.ids)){
     cq.dates <- cq.dates[1:min.ncc.quarter]
   }
   
+  
   #Begin creating the data file for the unique individual
   abbie <- data.frame(id = unique(words$id),
                       randomization.date = unique(words$X.5),
                       risk.level = unique(words$Risk.Level),
                       race = unique(words$X.4),
+                      drc  = unique(words$X.7),
                       day90  = cq.dates[2],
                       day91  = cq.dates[2] + 1,
                       day180 = cq.dates[3],
@@ -509,6 +511,8 @@ pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('06/30/2020', format = '%m/%d/%Y'),])
 
 # pfs$arrest9 = NULL
+
+pfs = pfs[,-c(56,57,58,59,63,64,65,66,68,70)]
 
 write.csv(pfs, 'Payforsuccess_flatfile_June20.csv', row.names = F)
 

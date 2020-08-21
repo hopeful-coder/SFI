@@ -50,8 +50,8 @@ library(reshape2)
 
 setwd('C:/Users/Mitchell Schepps/Desktop/nena/arrests_pop')
 # #Load in new data
-pop <- read.csv('UCLAQuarterlyReportJune2020Population.csv', skip = 1)
-arrests <- read.csv('UCLAQuarterlyReportJune2020Arrests.csv')
+pop <- read.csv('UCLAQuarterlyReportMay2020Pop.csv', skip = 1)
+arrests <- read.csv('UCLAQuarterlyReportMay2020Arrests.csv')
 # 
 # pop <- read.csv('UCLAQuarterlyReportDecember2019Population.csv', skip = 1)
 # arrests <- read.csv('UCLAQuarterlyReportDecember2019Arrests.csv')
@@ -88,8 +88,10 @@ setwd('C:/Users/Mitchell Schepps/Desktop/nena')
 #New ncc
 ncc = read.csv('ncc_531.csv', skip = 9)
 names(ncc)[1] = 'id'
+names(ncc)[4] = 'ncc_reason'
 names(ncc)[9] = 'ncc_date'
-ncc = ncc[, c('id', 'ncc_date')]
+ncc = ncc[, c('id', 'ncc_date', 'ncc_reason')]
+ncc = ncc[ncc$ncc_reason == 'NCC - Non-Conforming Referral',]
 
 #Merge population dataset and arrest dataset and ncc dataset
 test <- merge(pop, arrests, by = 'id', all.x = T)
@@ -126,8 +128,12 @@ for(i in 1:length(unique.ids)){
   words <- test2[test2$id == unique.ids[i], ]
   
   #Clean quarter dates
+  
   words$X.5 <- as.Date(words$X.5, format = '%Y-%m-%d')
   cq.dates <- unique(words$X.5) + 90*c(0:6)
+  if(!is.na(words$Arrest.Date)){
+  words$Arrest.Date = as.Date(words$Arrest.Date, format = '%Y-%m-%d')}
+
   #Use NCC dates
   if(!is.na(unique(words$ncc_date))){
     ncc_date = unique(c(words$ncc_date))
@@ -142,6 +148,7 @@ for(i in 1:length(unique.ids)){
                       race = unique(words$X.4),
                       age = unique(words$X.2),
                       gender = unique(words$X.3),
+                      drc    = unique(words$X.7),
                       day90  = cq.dates[2],
                       day91  = cq.dates[2] + 1,
                       day180 = cq.dates[3],
@@ -248,7 +255,6 @@ for(i in 1:length(unique.ids)){
     arrest.dates = arrest.dates2
       }
     
-    abbie$num.arrests = length(arrests.abbie)
     abbie$num.arrests1 = sum(arrest_quarters == 1, na.rm = T)
     abbie$num.arrests2 = sum(arrest_quarters == 2, na.rm = T)
     abbie$num.arrests3 = sum(arrest_quarters == 3, na.rm = T)
@@ -260,7 +266,15 @@ for(i in 1:length(unique.ids)){
     abbie$num.arrests9 = sum(arrest_quarters == 9, na.rm = T)
     abbie$num.arrests10 = sum(arrest_quarters == 10, na.rm = T)
 
+    arrests.abbie = words$Arrest.Date
     arrests.abbie = sort(arrests.abbie)
+    
+    if(!is.na(arrests.abbie)){
+    post_one = if_else(words$Arrest.Date <= words$X.5 + 365, 1, 0)
+    arrests.abbie = arrests.abbie[post_one == 1]
+    abbie$num.arrests = length(arrests.abbie)
+    arrests.type = arrests.type[post_one == 1]
+    arrest_quarters = arrest_quarters[post_one == 1]
     if(length(arrests.abbie) == 1){
       abbie$arrest1 <- arrests.abbie
       abbie$arrest1type <- arrests.type
@@ -593,10 +607,15 @@ for(i in 1:length(unique.ids)){
       abbie$aq13 = arrest_quarters[13]
       abbie$aq14 = arrest_quarters[14]
     }
+    }
   }
-  
+# 
+
+  abbie$ever.arrested = ifelse(length(arrests.abbie) == 0, 0,
+                               ifelse(is.na(arrests.abbie), 0, 1))
+
   #Ever arrested indicator variable
-  abbie$ever.arrested <- ifelse(any(is.na(arrests.abbie)), 0, 1)
+  # abbie$ever.arrested <- ifelse(any(is.na(arrests.abbie)), 0, 1)
   #Which quarter were you arrested in calculation
   arrests = c(words$Arrest.Date)
   arrest.quarter.list = c()
@@ -684,10 +703,22 @@ pas <- abbie.final2[abbie.final2$RandomGroup == 'Probation as Usual', ]
 
 pfs <- pfs[!(pfs$Intake.Date == ' '), ]
 pfs <- (pfs[as.Date(pfs$Intake.Date, format = '%m/%d/%Y') <= as.Date('05/31/2020', format = '%m/%d/%Y'),])
-
-
+# pfs = pfs[is.na(pfs$ncc),]
 
 other <- pas              
+
+rashmi1 = rbind(pfs, other)
+remove.names = c('aq1', 'aq2', 'aq3', 'aq4', 'aq5', 'aq6', 'aq7', 'aq8', 'aq9',
+                 'num.arrests1', 'num.arrests2', 'num.arrests3', 'num.arrests4',
+                 'num.arrests5', 'num.arrests6', 'num.arrests7', 'num.arrests8',
+                 'num.arrests9', 'num.arrests10',
+                 'arrest1type', 'arrest2type', 'arrest3type', 'arrest4type', 'arrest5type', 'arrest6type', 'arrest7type', 'arrest8type')
+remove.names = which(names(rashmi1) %in% remove.names)
+rashmi1 = rashmi1[, -remove.names]
+
+write.csv(rashmi1, 'SFI_Compare.csv')
+
+
 ```
 
 ## Data Collection
@@ -767,7 +798,7 @@ risk.df = data.frame(risk.level = c('Low', 'Low/Moderate', 'Moderate', 'High', '
 risk.df = melt(risk.df, by = 'risk.level')
 risk.df$risk.level = factor(risk.df$risk.level, levels = c('Low', 'Low/Moderate', 'Moderate', 'High', 'Very High', 'Undeclared'))
 names(risk.df)[2] = 'Group'
-ggplot(data=risk.df, aes(x=risk.level, y=value, fill=Group)) +
+ggplot(data=risk.df, aes(x=risk.level, y=value, fill=Group))+
   geom_bar(stat="identity", position=position_dodge())+
   geom_text(aes(label=paste0(round(value*100, 1), '%')), vjust=1.6, color="white",
             position = position_dodge(0.9), size=3.5)+
@@ -781,7 +812,7 @@ The age of parolees enrolled ranged from `r min(pfs$age)` to `r max(pfs$age)`. P
 
 ## Criminal Justice History
 Here is both a table and an accompanying graph of the arrests by population enrollment in both cohorts.
-```{r echo=FALSE, message=FALSE, warning=FALSE, cache=T}
+```{r eval = F, echo=FALSE, message=FALSE, warning=FALSE, cache=T}
 
 pfs_pop = colSums(pfs[,c(20:29)])
 pfs_clean = colSums(pfs[,c(32:41)])
@@ -821,6 +852,8 @@ for(i in 1:10){
                   potential =sum(other[[word.used.c]]))
   final2 = rbind(final2, df)
 }
+
+pfs$ncc2 = ifelse(is.na(pfs$ncc), 0, 1)
 
 final$group = 'pfs'
 final2$group = 'other'
@@ -923,11 +956,18 @@ ggplot(data=pop.df, aes(x=quarter, y=value, color=Group)) +
   theme_minimal()
 
 ggplot(data=pop.df, aes(x=quarter, y=value, color=Group)) +
-+   geom_line(stat="identity", position=position_dodge(), size = 4)+
-+   geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), linetype = 'dashed', size = 3)+
-+   scale_fill_brewer(palette="Paired")+
-+   labs(x = 'Quarter', y = 'Total Population /Arrests', title = 'Supplemental Figure: Population and Arrests of Cohort 1 Per Quarter')+
-+   theme_minimal()+scale_x_continuous("Quarter", labels = as.character(pop.df$quarter), breaks = pop.df$quarter)
+   geom_line(stat="identity", position=position_dodge(), size = 4)+
+   geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), linetype = 'dashed', size = 3)+
+   scale_fill_brewer(palette="Paired")+
+   labs(x = 'Quarter', y = 'Total Population/Arrests', title = 'Supplemental Figure: Population and Arrests of Cohort 1 Per Quarter')+
+   theme_minimal()+scale_x_continuous("Quarter", labels = as.character(pop.df$quarter), breaks = pop.df$quarter)
+
+ggplot(data=final3, aes(x=index, y=prop, color=group)) +
+   geom_line(stat="identity", position=position_dodge(), size = 2)+
+   geom_line(data=arrest.df, aes(x=quarter, y=value, color=Group), linetype = 'dashed', size = 3)+
+   scale_fill_brewer(palette="Paired")+
+   labs(x = 'Quarter', y = 'Total Population/Arrests', title = 'Supplemental Figure: Population and Arrests of Cohort 1 Per Quarter')+
+   theme_minimal()+scale_x_continuous("Quarter", labels = as.character(pop.df$quarter), breaks = pop.df$quarter)
 ```
 Difference in misdemeanors chi square
 
